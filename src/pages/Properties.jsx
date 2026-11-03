@@ -2,11 +2,13 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowLeft,
+  Bath,
   BedDouble,
   Building2,
   MapPin,
   Maximize,
   RotateCcw,
+  Search,
   SlidersHorizontal,
   X,
 } from 'lucide-react'
@@ -22,7 +24,7 @@ const PURPOSE_OPTIONS = [
 ]
 
 const SIZE_OPTIONS = [
-  { value: '', label: 'Any size' },
+  { value: '', label: 'Any' },
   { value: 'Marla', label: 'Marla' },
   { value: 'Kanal', label: 'Kanal' },
   { value: 'Sq. Yd', label: 'Sq. Yards' },
@@ -38,18 +40,42 @@ const BEDS_OPTIONS = [
   { value: '5', label: '5+' },
 ]
 
+const BATHS_OPTIONS = [
+  { value: '', label: 'Any' },
+  { value: '1', label: '1+' },
+  { value: '2', label: '2+' },
+  { value: '3', label: '3+' },
+  { value: '4', label: '4+' },
+  { value: '5', label: '5+' },
+]
+
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'price-asc', label: 'Price: Low to High' },
+  { value: 'price-desc', label: 'Price: High to Low' },
+]
+
 const INITIAL_FILTERS = {
+  keyword: '',
   purpose: 'all',
   city: '',
+  area: '',
   propertyType: '',
   minPrice: '',
   maxPrice: '',
   sizeUnit: '',
   beds: '',
+  baths: '',
+  sort: 'newest',
 }
 
 const CITIES = [...new Set(freshProperties.map((p) => p.city))].sort()
 const PROPERTY_TYPES = [...new Set(freshProperties.map((p) => p.propertyType))].sort()
+
+function areasForCity(city) {
+  const source = city ? freshProperties.filter((p) => p.city === city) : freshProperties
+  return [...new Set(source.map((p) => p.location))].sort()
+}
 
 function parsePriceInput(value) {
   if (value === '' || value == null) return null
@@ -58,8 +84,25 @@ function parsePriceInput(value) {
 }
 
 function matchesFilters(property, filters) {
+  const keyword = filters.keyword.trim().toLowerCase()
+  if (keyword) {
+    const haystack = [
+      property.title,
+      property.location,
+      property.city,
+      property.propertyType,
+      property.agent?.name,
+      property.agent?.agency,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+    if (!haystack.includes(keyword)) return false
+  }
+
   if (filters.purpose !== 'all' && property.purpose !== filters.purpose) return false
   if (filters.city && property.city !== filters.city) return false
+  if (filters.area && property.location !== filters.area) return false
   if (filters.propertyType && property.propertyType !== filters.propertyType) return false
 
   const minPrice = parsePriceInput(filters.minPrice)
@@ -74,7 +117,44 @@ function matchesFilters(property, filters) {
   const minBeds = parsePriceInput(filters.beds)
   if (minBeds != null && property.beds < minBeds) return false
 
+  const minBaths = parsePriceInput(filters.baths)
+  if (minBaths != null && property.baths < minBaths) return false
+
   return true
+}
+
+function sortProperties(properties, sort) {
+  const next = [...properties]
+  if (sort === 'price-asc') next.sort((a, b) => a.price - b.price)
+  else if (sort === 'price-desc') next.sort((a, b) => b.price - a.price)
+  else next.sort((a, b) => new Date(b.listedAt) - new Date(a.listedAt))
+  return next
+}
+
+function buildActiveChips(filters) {
+  const chips = []
+  if (filters.keyword.trim()) chips.push({ key: 'keyword', label: `Search: ${filters.keyword.trim()}` })
+  if (filters.purpose !== 'all') {
+    chips.push({
+      key: 'purpose',
+      label: filters.purpose === 'sale' ? 'Buy / Sale' : 'Rent',
+    })
+  }
+  if (filters.city) chips.push({ key: 'city', label: filters.city })
+  if (filters.area) chips.push({ key: 'area', label: filters.area })
+  if (filters.propertyType) chips.push({ key: 'propertyType', label: filters.propertyType })
+  if (filters.minPrice) chips.push({ key: 'minPrice', label: `Min ${formatPKR(filters.minPrice)}` })
+  if (filters.maxPrice) chips.push({ key: 'maxPrice', label: `Max ${formatPKR(filters.maxPrice)}` })
+  if (filters.sizeUnit) chips.push({ key: 'sizeUnit', label: filters.sizeUnit })
+  if (filters.beds) chips.push({ key: 'beds', label: `${filters.beds}+ beds` })
+  if (filters.baths) chips.push({ key: 'baths', label: `${filters.baths}+ baths` })
+  return chips
+}
+
+function clearChip(filters, chipKey) {
+  if (chipKey === 'keyword') return { ...filters, keyword: '' }
+  if (chipKey === 'purpose') return { ...filters, purpose: 'all' }
+  return { ...filters, [chipKey]: '' }
 }
 
 function FilterField({ label, children }) {
@@ -153,10 +233,8 @@ function PriceInput({ value, onChange, placeholder }) {
 }
 
 function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCloseMobile }) {
-  const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
-    if (key === 'purpose') return value !== 'all'
-    return value !== ''
-  })
+  const areas = areasForCity(filters.city)
+  const hasActiveFilters = buildActiveChips(filters).length > 0
 
   const content = (
     <>
@@ -201,13 +279,22 @@ function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, 
           />
         </FilterField>
 
-        <FilterField label="City / Area">
+        <FilterField label="City">
           <SelectInput
             icon={MapPin}
             value={filters.city}
-            onChange={(city) => onChange({ ...filters, city })}
+            onChange={(city) => onChange({ ...filters, city, area: '' })}
             options={CITIES}
             placeholder="All cities"
+          />
+        </FilterField>
+
+        <FilterField label="Area / Society">
+          <SelectInput
+            value={filters.area}
+            onChange={(area) => onChange({ ...filters, area })}
+            options={areas}
+            placeholder="All areas"
           />
         </FilterField>
 
@@ -262,6 +349,20 @@ function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, 
             />
           </div>
         </FilterField>
+
+        <FilterField label="Bathrooms">
+          <div className="flex items-center gap-2">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand">
+              <Bath className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <ChipGroup
+              name="Bathrooms"
+              options={BATHS_OPTIONS}
+              value={filters.baths}
+              onChange={(baths) => onChange({ ...filters, baths })}
+            />
+          </div>
+        </FilterField>
       </div>
 
       <p className="mt-6 border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500">
@@ -273,12 +374,10 @@ function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, 
 
   return (
     <>
-      {/* Desktop — flush left rail; filter block vertically centered */}
-      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col justify-center overflow-y-auto border-r border-slate-200/80 bg-slate-50/80 px-5 lg:flex xl:w-80">
-        <div className="my-auto w-full py-8">{content}</div>
+      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col overflow-y-auto border-r border-slate-200/80 bg-slate-50/80 px-5 py-8 lg:flex xl:w-80">
+        <div className="w-full">{content}</div>
       </aside>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
@@ -306,9 +405,21 @@ export default function Properties() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const filtered = useMemo(
-    () => freshProperties.filter((property) => matchesFilters(property, filters)),
+    () =>
+      sortProperties(
+        freshProperties.filter((property) => matchesFilters(property, filters)),
+        filters.sort,
+      ),
     [filters],
   )
+
+  const chips = useMemo(() => buildActiveChips(filters), [filters])
+
+  const clearAll = () => setFilters(INITIAL_FILTERS)
+
+  const removeChip = (chipKey) => {
+    setFilters((current) => clearChip(current, chipKey))
+  }
 
   return (
     <section className="min-h-screen bg-white">
@@ -316,7 +427,7 @@ export default function Properties() {
         <PropertyFilters
           filters={filters}
           onChange={setFilters}
-          onReset={() => setFilters(INITIAL_FILTERS)}
+          onReset={clearAll}
           resultCount={filtered.length}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
@@ -342,7 +453,69 @@ export default function Properties() {
             </button>
           </div>
 
-          <div className="mt-6 origin-top [zoom:0.9] sm:[zoom:0.92]">
+          <h1 className="mt-6 font-display text-2xl font-extrabold text-slate-900 sm:text-3xl">
+            Browse Properties
+          </h1>
+          <span className="mt-3 block h-1.5 w-20 rounded-full bg-brand" aria-hidden="true" />
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
+            Filter by purpose, city, society, type, budget, size, beds and baths.
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="relative block min-w-0 flex-1 max-w-xl">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-brand"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={filters.keyword}
+                onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+                placeholder="Search title, society or agency…"
+                className="w-full rounded-xl border border-slate-200 bg-white py-3 pr-3 pl-10 text-sm font-semibold text-slate-700 outline-none transition placeholder:font-medium placeholder:text-slate-400 focus:border-brand/40 focus:ring-2 focus:ring-brand/15"
+              />
+            </label>
+
+            <label className="shrink-0">
+              <span className="sr-only">Sort properties</span>
+              <select
+                value={filters.sort}
+                onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
+                className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-brand/40 focus:ring-2 focus:ring-brand/15 sm:w-48"
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {chips.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {chips.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={() => removeChip(chip.key)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1.5 text-[11px] font-bold text-brand ring-1 ring-brand/15 transition hover:bg-brand hover:text-white"
+                >
+                  {chip.label}
+                  <X className="h-3 w-3" aria-hidden="true" />
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={clearAll}
+                className="text-[11px] font-bold text-slate-500 underline-offset-2 hover:text-brand hover:underline"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+
+          <div className="mt-8 origin-top [zoom:0.9] sm:[zoom:0.92]">
             {filtered.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                 {filtered.map((property) => (
@@ -362,7 +535,7 @@ export default function Properties() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => setFilters(INITIAL_FILTERS)}
+                  onClick={clearAll}
                   className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white"
                 >
                   <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
