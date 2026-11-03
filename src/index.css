@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap');
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Pakistan Flag Theme — design tokens
+   Deep Forest Green #01411C · Clean White #FFFFFF
+   Accents: off-white #F9FAFB · light green tint #F0FDF4
+--------------------------------------------------------------------------- */
+@theme {
+  --color-brand: #01411c; /* Deep Forest Green (flag) */
+  --color-brand-dark: #012b13; /* pressed / gradient end   */
+  --color-brand-light: #046a2e; /* secondary green           */
+  --color-brand-soft: #f0fdf4; /* subtle green tint         */
+  --color-offwhite: #f9fafb; /* page surface              */
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Poppins', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-glass: 0 24px 60px -20px rgb(1 65 28 / 0.55);
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -18px rgb(15 23 42 / 0.18);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #f9fafb;
+    color: #1f2937;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  /* Consistent, accessible focus ring across the app */
+  :where(a, button, input, select, textarea):focus-visible {
+    outline: 2px solid #046a2e;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar for horizontal carousels while keeping native scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Price range slider — Pakistan flag green thumb
+--------------------------------------------------------------------------- */
+.price-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+}
+
+.price-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  background: #01411c;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgb(1 65 28 / 0.45);
+}
+
+.price-range::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  background: #01411c;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgb(1 65 28 / 0.45);
+}
+
+/* ---------------------------------------------------------------------------
+   Entry gate (RoleGate) — a fixed, non-scrolling screen.
+   On short viewports the copy compacts and the spacing tightens so the two
+   account options always fit without the gate ever needing to scroll.
+   Declared as plain media queries so the override order is deterministic.
+--------------------------------------------------------------------------- */
+@media (max-height: 700px) {
+  [data-role-gate] [data-gate-footnote] {
+    display: none;
+  }
+}
+
+@media (max-height: 620px) {
+  [data-role-gate] {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  [data-role-gate] [data-gate-intro] {
+    display: none;
+  }
+
+  [data-role-gate] [data-gate-options] {
+    margin-top: 14px;
+  }
+}
+
+@media (max-height: 460px) {
+  [data-role-gate] {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  [data-role-gate] [data-gate-options] {
+    margin-top: 10px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion — subtle entrance used by the hero + section headings
+--------------------------------------------------------------------------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-fade-up {
+    animation: none;
+  }
+}
