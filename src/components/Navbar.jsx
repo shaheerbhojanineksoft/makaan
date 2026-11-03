@@ -10,6 +10,7 @@ const NAV_LINKS = [
     to: '/agents-recommend',
     highlight: true,
   },
+  { label: 'My Recommendations', to: '/my-recommendations' },
   { label: 'About Us', to: '/about' },
   { label: 'Contact Us', to: '/contact' },
 ]

@@ -17,8 +17,12 @@ import Properties from './pages/Properties'
 import Plots from './pages/Plots'
 import AdvanceBooking from './pages/AdvanceBooking'
 import AdvanceBookingDetail from './pages/AdvanceBookingDetail'
+import AgentRecommendations from './pages/AgentRecommendations'
+import RecommendationDetail from './pages/RecommendationDetail'
+import MyRecommendations from './pages/MyRecommendations'
+import CreateRecommendation from './pages/CreateRecommendation'
+import AdminRecommendations from './pages/AdminRecommendations'
 import ComingSoon from './pages/ComingSoon'
-import WorkInProgress from './pages/WorkInProgress'
 
 /**
  * Application shell.
@@ -49,7 +53,8 @@ import WorkInProgress from './pages/WorkInProgress'
  * /agents, /properties, /plots and their :id detail routes drop the shared
  * Navbar / Footer (each detail page keeps its own back control).
  * /advanced-booking (+ :id detail) mirrors plots/properties inventory (no shell).
- * /agents-recommend remains a standalone work-in-progress screen.
+ * /agents-recommend (+ detail), /my-recommendations and /admin/recommendations
+ * keep the shared Navbar / Footer shell.
  */
 const AGENT_PROFILE_ROUTE = /^\/agents\/[^/]+\/?$/
 /* The card-only agents inventory — no Navbar, no Footer. */
@@ -64,7 +69,6 @@ const PLOT_DETAIL_ROUTE = /^\/plots\/[^/]+\/?$/
 const PROPERTY_DETAIL_ROUTE = /^\/properties\/[^/]+\/?$/
 const ADVANCED_BOOKING_ROUTE = /^\/advanced-booking\/?$/
 const ADVANCED_BOOKING_DETAIL_ROUTE = /^\/advanced-booking\/[^/]+\/?$/
-const AGENTS_RECOMMEND_ROUTE = /^\/agents-recommend\/?$/
 
 export default function App() {
   const [hasEntered, setHasEntered] = useState(false)
@@ -78,7 +82,6 @@ export default function App() {
   const isPropertyDetail = PROPERTY_DETAIL_ROUTE.test(pathname)
   const isAdvancedBooking = ADVANCED_BOOKING_ROUTE.test(pathname)
   const isAdvancedBookingDetail = ADVANCED_BOOKING_DETAIL_ROUTE.test(pathname)
-  const isAgentsRecommend = AGENTS_RECOMMEND_ROUTE.test(pathname)
   const showShell =
     !isAgentProfile &&
     !isAgentsIndex &&
@@ -87,8 +90,7 @@ export default function App() {
     !isPropertyDetail &&
     !isPlotDetail &&
     !isAdvancedBooking &&
-    !isAdvancedBookingDetail &&
-    !isAgentsRecommend
+    !isAdvancedBookingDetail
 
   useEffect(() => {
     if (pathname !== '/') setIsHomeSearchResults(false)
@@ -134,15 +136,17 @@ export default function App() {
 
             <Route path="/advanced-booking/:id" element={<AdvanceBookingDetail />} />
 
-            <Route
-              path="/agents-recommend"
-              element={
-                <WorkInProgress
-                  title="Work Under Progress"
-                  description="Agent recommendations are being built. Soon you will see curated picks from our star-marked partners here."
-                />
-              }
-            />
+            <Route path="/agents-recommend" element={<AgentRecommendations />} />
+
+            <Route path="/agents-recommend/:id" element={<RecommendationDetail />} />
+
+            <Route path="/my-recommendations" element={<MyRecommendations />} />
+
+            <Route path="/my-recommendations/new" element={<CreateRecommendation />} />
+
+            <Route path="/my-recommendations/:id/edit" element={<CreateRecommendation />} />
+
+            <Route path="/admin/recommendations" element={<AdminRecommendations />} />
 
             <Route
               path="*"
