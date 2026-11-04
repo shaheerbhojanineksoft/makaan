@@ -2,47 +2,70 @@ import { Link } from 'react-router-dom'
 import { SITE } from '../../data/siteConfig'
 
 /**
- * Brand lockup: green crescent-and-star mark + wordmark.
+ * Brand lockup: house mark + “Makaan” wordmark.
  *
  * @param {'light' | 'dark'} variant - `light` for white surfaces, `dark` for
  *   the forest-green footer / dark backgrounds.
- * @param {boolean} link - when false the lockup renders as a plain block, for
- *   decorative use inside modals where navigating is not wanted.
+ * @param {boolean} link - when false the lockup renders as a plain block.
  */
 export default function Logo({ variant = 'light', link = true, className = '' }) {
   const isLight = variant === 'light'
 
-  const classes = `group flex items-center gap-2.5 ${className}`
+  const classes = `group flex items-center gap-3 ${className}`
 
   const content = (
     <>
-      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-brand shadow-lg shadow-brand/25 transition-transform duration-300 group-hover:scale-105">
-        <svg viewBox="0 0 40 40" className="h-8 w-8" aria-hidden="true">
-          {/* Crescent */}
-          <circle cx="18" cy="20" r="13" fill="#FFFFFF" />
-          <circle cx="26" cy="16" r="11" fill="#01411C" />
-          {/* Star */}
-          <polygon
-            points="30,22.5 31.06,25.54 34.28,25.61 31.71,27.56 32.65,30.64 30,28.8 27.35,30.64 28.29,27.56 25.72,25.61 28.94,25.54"
-            fill="#FFFFFF"
+      <span
+        className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl shadow-lg transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14 ${
+          isLight
+            ? 'bg-brand text-white shadow-brand/25'
+            : 'bg-white text-brand shadow-brand-dark/30'
+        }`}
+      >
+        <svg viewBox="0 0 40 40" className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden="true" fill="none">
+          {/* Roof */}
+          <path
+            d="M7 19.5 L20 8.5 L33 19.5"
+            stroke="currentColor"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
+          {/* House body */}
+          <path
+            d="M10.5 18.5 V31.5 H29.5 V18.5"
+            stroke="currentColor"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {/* Door */}
+          <path
+            d="M17.5 31.5 V23.5 H22.5 V31.5"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {/* Window accent */}
+          <circle cx="26.5" cy="23.5" r="1.5" fill="currentColor" />
         </svg>
       </span>
 
       <span className="leading-none">
         <span
-          className={`block text-[15px] font-extrabold uppercase tracking-tight sm:text-base ${
+          className={`font-display block text-2xl font-extrabold tracking-tight sm:text-[1.7rem] ${
             isLight ? 'text-brand' : 'text-white'
           }`}
         >
-          Pakistan Property
+          Makaan
         </span>
         <span
-          className={`mt-1.5 block text-[11px] font-bold uppercase tracking-[0.32em] ${
-            isLight ? 'text-brand-light' : 'text-brand-soft/70'
+          className={`mt-1.5 block text-[10px] font-bold tracking-[0.28em] uppercase ${
+            isLight ? 'text-brand-light' : 'text-brand-soft/75'
           }`}
         >
-          Portal
+          Property Portal
         </span>
       </span>
     </>

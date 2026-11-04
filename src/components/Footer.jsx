@@ -37,7 +37,7 @@ export default function Footer() {
 
       <div className="relative grid w-full grid-cols-1 gap-8 px-4 py-10 sm:px-5 sm:py-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-10 lg:px-6 lg:py-12 xl:px-8">
         {/* Column 1 — Brand */}
-        <div>
+        <div className="pl-5 sm:pl-6 lg:pl-8">
           <Logo variant="dark" className="origin-left scale-100" />
 
           <p className="mt-5 max-w-sm font-display text-lg leading-snug font-bold text-balance text-white sm:text-xl">
@@ -47,21 +47,6 @@ export default function Footer() {
             Verified listings, licensed agents and transparent advanced booking — from Karachi to
             Gwadar.
           </p>
-
-          <div className="mt-5 flex gap-2.5">
-            {SOCIALS.map(({ label, icon: Icon, href }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noreferrer noopener"
-                aria-label={label}
-                className="grid h-9 w-9 place-items-center rounded-xl bg-white/10 text-brand-soft ring-1 ring-white/10 transition hover:bg-white hover:text-brand hover:ring-white"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
-          </div>
         </div>
 
         {/* Column 2 — Contact */}
@@ -91,6 +76,21 @@ export default function Footer() {
               <span>Head Office: Shahrah-e-Faisal, Karachi, Pakistan</span>
             </ContactRow>
           </ul>
+
+          <div className="mt-5 flex gap-2.5">
+            {SOCIALS.map(({ label, icon: Icon, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={label}
+                className="grid h-9 w-9 place-items-center rounded-xl bg-white/10 text-brand-soft ring-1 ring-white/10 transition hover:bg-white hover:text-brand hover:ring-white"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            ))}
+          </div>
         </div>
 
         {/* Column 3 — Newsletter */}
@@ -106,7 +106,7 @@ export default function Footer() {
           </p>
 
           <form
-            className="mt-5 space-y-2.5"
+            className="mt-5 flex max-w-[16.5rem] flex-col gap-2"
             onSubmit={(event) => {
               event.preventDefault()
               /* TODO: POST /api/newsletter */
@@ -120,11 +120,11 @@ export default function Footer() {
               type="email"
               required
               placeholder="you@example.com"
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-brand-soft/50 outline-none transition focus:border-white/40 focus:bg-white/15"
+              className="h-10 w-full rounded-lg border border-white/20 bg-white/10 px-3 text-sm leading-none text-white placeholder:text-brand-soft/50 outline-none transition focus:border-white/40 focus:bg-white/15"
             />
             <button
               type="submit"
-              className="w-full rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-brand shadow-lg shadow-brand-dark/30 transition hover:-translate-y-0.5 hover:bg-brand-soft"
+              className="h-10 w-full rounded-lg bg-white px-4 text-sm font-extrabold text-brand shadow-md shadow-brand-dark/25 transition hover:bg-brand-soft"
             >
               Subscribe
             </button>

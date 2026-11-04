@@ -5,8 +5,8 @@
  * stored locally under /public — tuned to the deep-forest green theme.
  */
 export const SITE = {
-  name: 'Pakistan Property Portal',
-  shortName: 'PPP',
+  name: 'Makaan',
+  shortName: 'Makaan',
   tagline: 'Pakistan ka Apna Trusted Property Portal',
   heroImage: '/hero-marketplace.jpg',
   supportPhone: '+92 21 111 000 111',
