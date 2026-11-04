@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { CalendarCheck, Menu, Star, X } from 'lucide-react'
 import Logo from './ui/Logo'
+import { useFavorites } from '../utils/favorites'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
@@ -10,13 +11,13 @@ const NAV_LINKS = [
     to: '/agents-recommend',
     highlight: true,
   },
-  { label: 'My Recommendations', to: '/my-recommendations' },
+  { label: 'Favourites', to: '/favourites' },
   { label: 'About Us', to: '/about' },
   { label: 'Contact Us', to: '/contact' },
 ]
 
 function highlightClass({ isActive }) {
-  return `inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-extrabold tracking-wide transition ${
+  return `inline-flex items-center gap-2 rounded-full px-4.5 py-2.5 text-sm font-extrabold tracking-wide transition ${
     isActive
       ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30 ring-1 ring-amber-600/20'
       : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/90 hover:bg-amber-100 hover:text-amber-800'
@@ -27,6 +28,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { pathname } = useLocation()
+  const favoriteCount = useFavorites().length
 
   /* Close the mobile drawer whenever the route changes. */
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function Navbar() {
   }, [])
 
   const linkClass = ({ isActive }) =>
-    `relative rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+    `relative rounded-lg px-3.5 py-2.5 text-[15px] font-semibold transition-colors ${
       isActive ? 'text-brand' : 'text-slate-600 hover:text-brand'
     }`
 
@@ -52,29 +54,36 @@ export default function Navbar() {
         isScrolled ? 'border-slate-200 shadow-sm' : 'border-transparent'
       }`}
     >
-      <nav className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-5 lg:px-6 xl:px-8">
+      <nav className="flex min-h-[5.75rem] w-full items-center justify-between gap-4 px-4 py-7 sm:min-h-[6.25rem] sm:px-5 lg:px-6 xl:px-8">
         <Logo />
 
         {/* Desktop navigation — pinned to the right edge */}
-        <div className="hidden items-center gap-1 lg:flex">
+        <div className="hidden items-center gap-1.5 lg:flex">
           {NAV_LINKS.map((link) =>
             link.highlight ? (
               <NavLink key={link.to} to={link.to} className={highlightClass}>
-                <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                <Star className="h-4 w-4 fill-current" aria-hidden="true" />
                 {link.label}
               </NavLink>
             ) : (
               <NavLink key={link.to} to={link.to} className={linkClass} end={link.to === '/'}>
-                {link.label}
+                <span className="inline-flex items-center gap-1.5">
+                  {link.label}
+                  {link.to === '/favourites' && favoriteCount > 0 && (
+                    <span className="rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-extrabold text-white">
+                      {favoriteCount}
+                    </span>
+                  )}
+                </span>
               </NavLink>
             ),
           )}
 
           <Link
             to="/advanced-booking"
-            className="ml-3 inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-brand/25 transition hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl"
+            className="ml-3 inline-flex items-center gap-2.5 rounded-xl bg-brand px-6 py-3.5 text-[15px] font-bold text-white shadow-lg shadow-brand/25 transition hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl"
           >
-            <CalendarCheck className="h-4 w-4" />
+            <CalendarCheck className="h-5 w-5" />
             Advanced Booking
           </Link>
         </div>
@@ -86,9 +95,9 @@ export default function Navbar() {
           aria-expanded={isOpen}
           aria-controls="mobile-menu"
           aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 text-brand transition hover:bg-brand-soft lg:hidden"
+          className="grid h-14 w-14 place-items-center rounded-xl border border-slate-200 text-brand transition hover:bg-brand-soft lg:hidden"
         >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </nav>
 
@@ -96,24 +105,24 @@ export default function Navbar() {
       <div
         id="mobile-menu"
         className={`overflow-hidden border-t border-slate-100 bg-white transition-[max-height,opacity] duration-300 lg:hidden ${
-          isOpen ? 'max-h-[28rem] opacity-100' : 'max-h-0 opacity-0'
+          isOpen ? 'max-h-[32rem] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="space-y-1 px-4 py-4 sm:px-6">
+        <div className="space-y-1.5 px-4 py-5 sm:px-6">
           {NAV_LINKS.map((link) =>
             link.highlight ? (
               <NavLink
                 key={link.to}
                 to={link.to}
                 className={({ isActive }) =>
-                  `flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition ${
+                  `flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-extrabold transition ${
                     isActive
                       ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25'
                       : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100'
                   }`
                 }
               >
-                <Star className="h-4 w-4 fill-current" aria-hidden="true" />
+                <Star className="h-4.5 w-4.5 fill-current" aria-hidden="true" />
                 {link.label}
               </NavLink>
             ) : (
@@ -122,21 +131,26 @@ export default function Navbar() {
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `block rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                  `flex items-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-semibold transition ${
                     isActive ? 'bg-brand-soft text-brand' : 'text-slate-700 hover:bg-slate-50'
                   }`
                 }
               >
                 {link.label}
+                {link.to === '/favourites' && favoriteCount > 0 && (
+                  <span className="rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-extrabold text-white">
+                    {favoriteCount}
+                  </span>
+                )}
               </NavLink>
             ),
           )}
 
           <Link
             to="/advanced-booking"
-            className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-brand/25"
+            className="mt-2 flex items-center justify-center gap-2.5 rounded-xl bg-brand px-5 py-4 text-[15px] font-bold text-white shadow-lg shadow-brand/25"
           >
-            <CalendarCheck className="h-4 w-4" />
+            <CalendarCheck className="h-5 w-5" />
             Advanced Booking
           </Link>
         </div>

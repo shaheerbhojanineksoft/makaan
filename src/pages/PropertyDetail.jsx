@@ -23,8 +23,10 @@ import {
 } from 'lucide-react'
 
 import Badge from '../components/ui/Badge'
+import FavoriteButton from '../components/FavoriteButton'
 import SectionHeading from '../components/ui/SectionHeading'
 import { formatMonthYear, formatPKR } from '../utils/format'
+import { FAVORITE_KINDS } from '../utils/favorites'
 import { getOtherProperties, getPropertyById } from '../data/properties'
 import { getAgentById } from '../data/agents'
 
@@ -340,6 +342,12 @@ export default function PropertyDetail() {
                 <span className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-bold text-brand backdrop-blur">
                   {property.propertyType}
                 </span>
+                <FavoriteButton
+                  kind={FAVORITE_KINDS.property}
+                  id={property.id}
+                  size="md"
+                  className="absolute top-4 right-4"
+                />
                 <span className="absolute right-4 bottom-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-bold text-slate-700 backdrop-blur">
                   Added {formatMonthYear(property.listedAt)}
                 </span>

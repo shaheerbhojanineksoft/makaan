@@ -23,8 +23,10 @@ import {
 
 import Badge from '../components/ui/Badge'
 import BookingProjectCard from '../components/BookingProjectCard'
+import FavoriteButton from '../components/FavoriteButton'
 import SectionHeading from '../components/ui/SectionHeading'
 import { getOtherProjects, getProjectById } from '../data/projects'
+import { FAVORITE_KINDS } from '../utils/favorites'
 import { formatMonthYear, formatPKR } from '../utils/format'
 
 const PANEL_CLASS =
@@ -95,6 +97,13 @@ function ProjectGallery({ project }) {
         <div
           className="absolute inset-0 bg-gradient-to-t from-brand/60 via-brand/5 to-transparent"
           aria-hidden="true"
+        />
+
+        <FavoriteButton
+          kind={FAVORITE_KINDS.project}
+          id={project.id}
+          size="md"
+          className="absolute top-4 right-4"
         />
 
         <span className="absolute right-4 bottom-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-bold text-slate-700 backdrop-blur">

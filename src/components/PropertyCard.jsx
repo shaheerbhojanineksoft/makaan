@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { Bath, BedDouble, Clock3, MapPin, Maximize } from 'lucide-react'
 
 import Badge from './ui/Badge'
+import FavoriteButton from './FavoriteButton'
+import { FAVORITE_KINDS } from '../utils/favorites'
 import { formatPKR, timeAgo } from '../utils/format'
 
 function SpecItem({ icon: Icon, label }) {
@@ -30,6 +32,12 @@ export default function PropertyCard({ property }) {
           alt={property.title}
           loading="lazy"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+        <FavoriteButton
+          kind={FAVORITE_KINDS.property}
+          id={property.id}
+          size="sm"
+          className="absolute top-3 left-3"
         />
         <span className="absolute top-3 right-3 rounded-full bg-brand/90 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-white uppercase backdrop-blur">
           For {isRent ? 'Rent' : 'Sale'}

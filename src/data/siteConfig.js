@@ -1,19 +1,14 @@
 /**
  * Global site configuration.
  *
- * `heroImage` ships with a locally authored, licence-free illustrated skyline
- * of real Pakistani landmarks (Badshahi Mosque, Minar-e-Pakistan,
- * Mazar-e-Quaid, Faisal Mosque) at /public/hero-pakistan.svg, so the hero never
- * depends on an external host.
- *
- * To swap in a licensed photograph instead, drop the file into /public and set
- * e.g. `heroImage: '/minar-e-pakistan.jpg'` (or import it from /src/assets).
+ * `heroImage` is a branded marketplace illustration (homes, villas, plots)
+ * stored locally under /public — tuned to the deep-forest green theme.
  */
 export const SITE = {
   name: 'Pakistan Property Portal',
   shortName: 'PPP',
   tagline: 'Pakistan ka Apna Trusted Property Portal',
-  heroImage: '/hero-pakistan.svg',
+  heroImage: '/hero-marketplace.jpg',
   supportPhone: '+92 21 111 000 111',
   supportEmail: 'help@pakistanpropertyportal.pk',
   offices: ['Karachi', 'Lahore', 'Islamabad'],

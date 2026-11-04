@@ -1,14 +1,17 @@
-import { Building2, CalendarClock, MapPin } from 'lucide-react'
+import { Building2, CalendarClock, MapPin, Sparkles } from 'lucide-react'
 
 import PropertyCard from './PropertyCard'
 import PlotCard from './PlotCard'
+import FavoriteButton from './FavoriteButton'
 import SectionHeading from './ui/SectionHeading'
+import { FAVORITE_KINDS } from '../utils/favorites'
 import { featuredPlots } from '../data/plots'
 import { freshProperties } from '../data/properties'
 import { trendingProjects } from '../data/projects'
 import { formatMonthYear, formatPKR } from '../utils/format'
 
 function matchesPropertyType(property, selectedType) {
+  if (!selectedType) return true
   if (selectedType === 'Flat / Apartment') {
     return property.propertyType === 'Apartment' || property.propertyType === 'Flat'
   }
@@ -18,6 +21,13 @@ function matchesPropertyType(property, selectedType) {
   if (selectedType === 'Office') return property.propertyType.includes('Office')
   if (selectedType === 'Shop') return property.propertyType.includes('Shop')
   return property.propertyType === selectedType
+}
+
+function matchesKeyword(haystackParts, keyword) {
+  if (!keyword) return true
+  const needle = keyword.trim().toLowerCase()
+  if (!needle) return true
+  return haystackParts.filter(Boolean).join(' ').toLowerCase().includes(needle)
 }
 
 function ProjectResultCard({ project }) {
@@ -33,6 +43,12 @@ function ProjectResultCard({ project }) {
         <span className="absolute top-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold text-brand">
           {project.status}
         </span>
+        <FavoriteButton
+          kind={FAVORITE_KINDS.project}
+          id={project.id}
+          size="sm"
+          className="absolute top-3 right-3"
+        />
       </div>
       <div className="p-5">
         <p className="text-xs font-bold text-brand">{project.projectType}</p>
@@ -60,38 +76,123 @@ function ProjectResultCard({ project }) {
 }
 
 function getMatches(filters) {
+  const city = filters.city || ''
+  const area = filters.area || ''
+  const propertyType = filters.propertyType || ''
+  const maxPrice = filters.maxPrice
+  const keyword = filters.keyword || ''
+  const beds = filters.beds ?? null
+
   if (filters.purpose === 'booking') {
     return {
       kind: 'projects',
-      items: trendingProjects.filter(
-        (project) =>
-          project.city === filters.city &&
-          project.projectType === filters.propertyType &&
-          project.startingPrice <= filters.maxPrice,
-      ),
+      items: trendingProjects.filter((project) => {
+        if (city && project.city !== city) return false
+        if (area && project.location !== area) return false
+        if (propertyType && project.projectType !== propertyType) return false
+        if (maxPrice != null && project.startingPrice > maxPrice) return false
+        if (
+          !matchesKeyword(
+            [project.name, project.location, project.city, project.projectType],
+            keyword,
+          )
+        ) {
+          return false
+        }
+        return true
+      }),
     }
   }
 
-  const properties = freshProperties.filter(
-    (property) =>
-      property.city === filters.city &&
-      property.purpose === (filters.purpose === 'rent' ? 'rent' : 'sale') &&
-      matchesPropertyType(property, filters.propertyType) &&
-      property.price <= filters.maxPrice,
-  )
+  const purpose = filters.purpose === 'rent' ? 'rent' : 'sale'
 
-  const plots =
+  const properties = freshProperties.filter((property) => {
+    if (city && property.city !== city) return false
+    if (area && property.location !== area) return false
+    if (property.purpose !== purpose) return false
+    if (!matchesPropertyType(property, propertyType)) return false
+    if (maxPrice != null && property.price > maxPrice) return false
+    if (beds != null && property.beds < beds) return false
+    if (
+      !matchesKeyword(
+        [property.title, property.location, property.city, property.propertyType],
+        keyword,
+      )
+    ) {
+      return false
+    }
+    return true
+  })
+
+  const wantsPlots =
     filters.purpose === 'buy' &&
-    ['Residential Plot', 'Commercial Plot'].includes(filters.propertyType)
-      ? featuredPlots.filter(
-          (plot) =>
-            plot.city === filters.city &&
-            `${plot.plotType} Plot` === filters.propertyType &&
-            plot.price <= filters.maxPrice,
-        )
-      : []
+    (!propertyType ||
+      propertyType === 'Residential Plot' ||
+      propertyType === 'Commercial Plot')
+
+  const plots = wantsPlots
+    ? featuredPlots.filter((plot) => {
+        if (city && plot.city !== city) return false
+        if (area && plot.location !== area) return false
+        if (propertyType && `${plot.plotType} Plot` !== propertyType) return false
+        if (maxPrice != null && plot.price > maxPrice) return false
+        if (!matchesKeyword([plot.title, plot.location, plot.city, plot.plotType], keyword)) {
+          return false
+        }
+        return true
+      })
+    : []
 
   return { kind: 'listings', properties, plots, items: [...properties, ...plots] }
+}
+
+function buildFilterSummary(filters) {
+  const parts = []
+  if (filters.city) parts.push(filters.city)
+  if (filters.area) parts.push(filters.area)
+  if (filters.propertyType) parts.push(filters.propertyType)
+  if (filters.beds) parts.push(`${filters.beds}+ beds`)
+  if (filters.keyword) parts.push(`“${filters.keyword}”`)
+  if (filters.maxPrice != null) parts.push(`Up to ${formatPKR(filters.maxPrice)}`)
+  return parts.length > 0 ? parts.join(' · ') : 'All matching listings'
+}
+
+function InterpretedChips({ filters }) {
+  if (filters.source !== 'ask') return null
+
+  const chips = [
+    { label: 'Purpose', value: filters.purpose },
+    filters.city && { label: 'City', value: filters.city },
+    filters.propertyType && { label: 'Type', value: filters.propertyType },
+    filters.beds && { label: 'Beds', value: `${filters.beds}+` },
+    filters.keyword && { label: 'Area', value: filters.keyword },
+    filters.maxPrice != null && { label: 'Budget', value: formatPKR(filters.maxPrice) },
+  ].filter(Boolean)
+
+  return (
+    <div className="mt-6 rounded-2xl border border-brand/15 bg-brand-soft/40 px-4 py-4 sm:px-5">
+      <p className="flex items-center gap-2 text-xs font-bold tracking-wide text-brand uppercase">
+        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+        Ask Makan understood
+      </p>
+      {filters.query && (
+        <p className="mt-2 text-sm font-medium text-slate-600">
+          “{filters.query}”
+        </p>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {chips.map((chip) => (
+          <span
+            key={`${chip.label}-${chip.value}`}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200"
+          >
+            <span className="text-slate-400">{chip.label}</span>
+            <span className="text-brand">{chip.value}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default function HomeSearchResults({ filters, onClear }) {
@@ -104,20 +205,22 @@ export default function HomeSearchResults({ filters, onClear }) {
         <SectionHeading
           eyebrow="Search Results"
           title={`${matches.items.length} Matching ${isBooking ? 'Projects' : 'Listings'} Found`}
-          description={`${filters.city} · ${filters.propertyType} · Up to ${formatPKR(filters.maxPrice)}`}
+          description={buildFilterSummary(filters)}
           action={
             matches.items.length === 0 && (
-            <button
-              type="button"
-              onClick={onClear}
-              className="inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-white px-5 py-2.5 text-sm font-bold text-brand transition hover:bg-brand hover:text-white"
-            >
-              <Building2 className="h-4 w-4" aria-hidden="true" />
-              Show Home Sections
-            </button>
+              <button
+                type="button"
+                onClick={onClear}
+                className="inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-white px-5 py-2.5 text-sm font-bold text-brand transition hover:bg-brand hover:text-white"
+              >
+                <Building2 className="h-4 w-4" aria-hidden="true" />
+                Show Home Sections
+              </button>
             )
           }
         />
+
+        <InterpretedChips filters={filters} />
 
         {matches.items.length > 0 ? (
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

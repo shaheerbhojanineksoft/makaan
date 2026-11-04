@@ -16,8 +16,8 @@ export default function Logo({ variant = 'light', link = true, className = '' })
 
   const content = (
     <>
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand shadow-lg shadow-brand/25 transition-transform duration-300 group-hover:scale-105">
-        <svg viewBox="0 0 40 40" className="h-6 w-6" aria-hidden="true">
+      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-brand shadow-lg shadow-brand/25 transition-transform duration-300 group-hover:scale-105">
+        <svg viewBox="0 0 40 40" className="h-8 w-8" aria-hidden="true">
           {/* Crescent */}
           <circle cx="18" cy="20" r="13" fill="#FFFFFF" />
           <circle cx="26" cy="16" r="11" fill="#01411C" />
@@ -31,14 +31,14 @@ export default function Logo({ variant = 'light', link = true, className = '' })
 
       <span className="leading-none">
         <span
-          className={`block text-[12.5px] font-extrabold uppercase tracking-tight sm:text-sm ${
+          className={`block text-[15px] font-extrabold uppercase tracking-tight sm:text-base ${
             isLight ? 'text-brand' : 'text-white'
           }`}
         >
           Pakistan Property
         </span>
         <span
-          className={`mt-1 block text-[9px] font-bold uppercase tracking-[0.32em] ${
+          className={`mt-1.5 block text-[11px] font-bold uppercase tracking-[0.32em] ${
             isLight ? 'text-brand-light' : 'text-brand-soft/70'
           }`}
         >

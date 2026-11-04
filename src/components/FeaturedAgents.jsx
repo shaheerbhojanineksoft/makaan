@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { BadgeCheck, MapPin, Star } from 'lucide-react'
 import SectionHeading from './ui/SectionHeading'
+import FavoriteButton from './FavoriteButton'
 import { featuredAgents } from '../data/agents'
+import { FAVORITE_KINDS } from '../utils/favorites'
 
 /**
  * Expert card for the home page "Meet Our Trusted Property Experts" section.
@@ -16,6 +18,13 @@ function AgentCard({ agent }) {
         to={`/agents/${agent.id}`}
         aria-label={`View profile for ${agent.name}`}
         className="absolute inset-0 z-10 rounded-2xl"
+      />
+
+      <FavoriteButton
+        kind={FAVORITE_KINDS.agent}
+        id={agent.id}
+        size="sm"
+        className="absolute top-3 left-3"
       />
 
       {agent.starPartner && (

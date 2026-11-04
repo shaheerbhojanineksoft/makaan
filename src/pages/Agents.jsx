@@ -13,7 +13,9 @@ import {
 } from 'lucide-react'
 
 import Badge from '../components/ui/Badge'
+import FavoriteButton from '../components/FavoriteButton'
 import { featuredAgents } from '../data/agents'
+import { FAVORITE_KINDS } from '../utils/favorites'
 
 const INITIAL_FILTERS = {
   city: '',
@@ -92,6 +94,13 @@ function AgentCard({ agent }) {
         state={{ from: '/agents' }}
         aria-label={`View profile for ${agent.name}`}
         className="absolute inset-0 z-10 rounded-2xl"
+      />
+
+      <FavoriteButton
+        kind={FAVORITE_KINDS.agent}
+        id={agent.id}
+        size="sm"
+        className="absolute top-3 left-3"
       />
 
       {agent.starPartner && (

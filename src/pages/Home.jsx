@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import HeroSearch from '../components/HeroSearch'
 import HomeSearchResults from '../components/HomeSearchResults'
@@ -21,6 +21,17 @@ import FreshProperties from '../components/FreshProperties'
  */
 export default function Home({ onSearchResultsVisibilityChange }) {
   const [searchFilters, setSearchFilters] = useState(null)
+
+  useEffect(() => {
+    if (!searchFilters) return undefined
+    const frame = requestAnimationFrame(() => {
+      document.getElementById('home-search-results')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [searchFilters])
 
   /**
    * Show local matching listings below the hero without leaving the home page.

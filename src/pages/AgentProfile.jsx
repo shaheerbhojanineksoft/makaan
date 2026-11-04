@@ -20,8 +20,10 @@ import {
   Users,
 } from 'lucide-react'
 
+import FavoriteButton from '../components/FavoriteButton'
 import { AGENCY_SERVICES, getAgentById } from '../data/agents'
 import { freshProperties } from '../data/properties'
+import { FAVORITE_KINDS } from '../utils/favorites'
 import { formatPKR } from '../utils/format'
 
 /**
@@ -166,12 +168,14 @@ function ProfileContent({ agent, backTo }) {
     <>
       {/* Cover + identity */}
       <section className="relative isolate">
-        <div className="relative h-72 w-full overflow-hidden bg-brand sm:h-[26rem]">
-          <img src={agent.coverImage} alt="" className="h-full w-full object-cover" />
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-brand via-brand/50 to-brand/10"
-            aria-hidden="true"
-          />
+        <div className="relative h-72 w-full bg-brand sm:h-[26rem]">
+          <div className="absolute inset-0 overflow-hidden">
+            <img src={agent.coverImage} alt="" className="h-full w-full object-cover" />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-brand via-brand/50 to-brand/10"
+              aria-hidden="true"
+            />
+          </div>
           <Link
             to={backTo}
             aria-label={backIsAgents ? 'Back to all agents' : 'Back to home'}
@@ -179,6 +183,12 @@ function ProfileContent({ agent, backTo }) {
           >
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </Link>
+          <FavoriteButton
+            kind={FAVORITE_KINDS.agent}
+            id={agent.id}
+            size="lg"
+            className="absolute top-4 right-4 z-20 sm:top-5 sm:right-5 lg:right-6 xl:right-8"
+          />
         </div>
 
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

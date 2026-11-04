@@ -7,6 +7,8 @@ import {
 } from 'lucide-react'
 
 import Badge from './ui/Badge'
+import FavoriteButton from './FavoriteButton'
+import { FAVORITE_KINDS } from '../utils/favorites'
 import { formatMonthYear, formatPKR } from '../utils/format'
 
 const STATUS_VARIANT = {
@@ -45,6 +47,12 @@ export default function BookingProjectCard({ project }) {
             {project.bookingStatus}
           </Badge>
         </div>
+        <FavoriteButton
+          kind={FAVORITE_KINDS.project}
+          id={project.id}
+          size="sm"
+          className="absolute top-3 right-3"
+        />
       </div>
 
       <div className="flex flex-1 flex-col p-5">

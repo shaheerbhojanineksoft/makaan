@@ -22,6 +22,7 @@ import RecommendationDetail from './pages/RecommendationDetail'
 import MyRecommendations from './pages/MyRecommendations'
 import CreateRecommendation from './pages/CreateRecommendation'
 import AdminRecommendations from './pages/AdminRecommendations'
+import Favourites from './pages/Favourites'
 import ComingSoon from './pages/ComingSoon'
 
 /**
@@ -116,6 +117,8 @@ export default function App() {
             <Route path="/about" element={<About />} />
 
             <Route path="/contact" element={<ContactUs />} />
+
+            <Route path="/favourites" element={<Favourites />} />
 
             <Route path="/properties" element={<Properties />} />
 

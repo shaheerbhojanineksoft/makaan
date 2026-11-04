@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { MapPin, Ruler, SquareStack } from 'lucide-react'
 
 import Badge from './ui/Badge'
+import FavoriteButton from './FavoriteButton'
+import { FAVORITE_KINDS } from '../utils/favorites'
 import { formatPKR } from '../utils/format'
 
 /**
@@ -33,6 +35,13 @@ export default function PlotCard({ plot }) {
         <div
           className="absolute inset-0 bg-gradient-to-t from-brand/55 via-transparent to-transparent"
           aria-hidden="true"
+        />
+
+        <FavoriteButton
+          kind={FAVORITE_KINDS.plot}
+          id={plot.id}
+          size="sm"
+          className="absolute top-3 right-3"
         />
 
         {/* Tags */}

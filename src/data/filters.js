@@ -4,6 +4,9 @@
  * (e.g. GET /api/meta/cities) without changing any component code.
  */
 
+import { featuredPlots } from './plots'
+import { freshProperties } from './properties'
+
 export const CITIES = [
   'Karachi',
   'Lahore',
@@ -18,6 +21,15 @@ export const CITIES = [
   'Sialkot',
   'Bahawalpur',
 ]
+
+/** Area / society options for a city (from local listing data). */
+export function areasForCity(city = '') {
+  const properties = city
+    ? freshProperties.filter((item) => item.city === city)
+    : freshProperties
+  const plots = city ? featuredPlots.filter((item) => item.city === city) : featuredPlots
+  return [...new Set([...properties, ...plots].map((item) => item.location))].sort()
+}
 
 export const PROPERTY_TYPES = [
   'House',
