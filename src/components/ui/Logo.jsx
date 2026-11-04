@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { SITE } from '../../data/siteConfig'
 
 /**
@@ -10,6 +10,7 @@ import { SITE } from '../../data/siteConfig'
  */
 export default function Logo({ variant = 'light', link = true, className = '' }) {
   const isLight = variant === 'light'
+  const { pathname } = useLocation()
 
   const classes = `group flex items-center gap-3 ${className}`
 
@@ -75,8 +76,15 @@ export default function Logo({ variant = 'light', link = true, className = '' })
     return <div className={classes}>{content}</div>
   }
 
+  function handleClick(event) {
+    if (pathname === '/') {
+      event.preventDefault()
+      window.location.reload()
+    }
+  }
+
   return (
-    <Link to="/" className={classes} aria-label={`${SITE.name} — Home`}>
+    <Link to="/" onClick={handleClick} className={classes} aria-label={`${SITE.name} — Home`}>
       {content}
     </Link>
   )

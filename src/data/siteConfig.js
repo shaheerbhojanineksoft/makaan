@@ -15,6 +15,17 @@ export const SITE = {
 }
 
 /**
+ * Demo logged-in seeker — swap for real session/user API later.
+ */
+export const CURRENT_USER = {
+  id: 'user-demo-001',
+  name: 'Ali Hassan',
+  email: 'ali.hassan@email.com',
+  phone: '+92 300 1234567',
+  avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
+}
+
+/**
  * Contact Us page configuration — single source of truth for the support
  * channels, office address and business hours shown on /contact.
  *

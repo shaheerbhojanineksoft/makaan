@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { CalendarCheck, Menu, Star, X } from 'lucide-react'
 import Logo from './ui/Logo'
-import { useFavorites } from '../utils/favorites'
+import UserAvatarMenu from './UserAvatarMenu'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
@@ -11,7 +11,6 @@ const NAV_LINKS = [
     to: '/agents-recommend',
     highlight: true,
   },
-  { label: 'Favourites', to: '/favourites' },
   { label: 'About Us', to: '/about' },
   { label: 'Contact Us', to: '/contact' },
 ]
@@ -24,11 +23,10 @@ function highlightClass({ isActive }) {
   }`
 }
 
-export default function Navbar() {
+export default function Navbar({ onSignOut }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { pathname } = useLocation()
-  const favoriteCount = useFavorites().length
 
   /* Close the mobile drawer whenever the route changes. */
   useEffect(() => {
@@ -48,6 +46,13 @@ export default function Navbar() {
       isActive ? 'text-brand' : 'text-slate-600 hover:text-brand'
     }`
 
+  function handleHomeClick(event) {
+    if (pathname === '/') {
+      event.preventDefault()
+      window.location.reload()
+    }
+  }
+
   return (
     <header
       className={`sticky top-0 z-50 border-b bg-white/90 backdrop-blur-md transition-shadow duration-300 ${
@@ -66,15 +71,14 @@ export default function Navbar() {
                 {link.label}
               </NavLink>
             ) : (
-              <NavLink key={link.to} to={link.to} className={linkClass} end={link.to === '/'}>
-                <span className="inline-flex items-center gap-1.5">
-                  {link.label}
-                  {link.to === '/favourites' && favoriteCount > 0 && (
-                    <span className="rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-extrabold text-white">
-                      {favoriteCount}
-                    </span>
-                  )}
-                </span>
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={linkClass}
+                end={link.to === '/'}
+                onClick={link.to === '/' ? handleHomeClick : undefined}
+              >
+                {link.label}
               </NavLink>
             ),
           )}
@@ -86,19 +90,26 @@ export default function Navbar() {
             <CalendarCheck className="h-5 w-5" />
             Advanced Booking
           </Link>
+
+          <div className="ml-2">
+            <UserAvatarMenu onSignOut={onSignOut} />
+          </div>
         </div>
 
-        {/* Mobile trigger */}
-        <button
-          type="button"
-          onClick={() => setIsOpen((open) => !open)}
-          aria-expanded={isOpen}
-          aria-controls="mobile-menu"
-          aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          className="grid h-14 w-14 place-items-center rounded-xl border border-slate-200 text-brand transition hover:bg-brand-soft lg:hidden"
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {/* Mobile: avatar + menu */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <UserAvatarMenu compact onSignOut={onSignOut} />
+          <button
+            type="button"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
+            aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            className="grid h-14 w-14 place-items-center rounded-xl border border-slate-200 text-brand transition hover:bg-brand-soft"
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile drawer */}
@@ -130,6 +141,7 @@ export default function Navbar() {
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
+                onClick={link.to === '/' ? handleHomeClick : undefined}
                 className={({ isActive }) =>
                   `flex items-center gap-2 rounded-xl px-4 py-3.5 text-[15px] font-semibold transition ${
                     isActive ? 'bg-brand-soft text-brand' : 'text-slate-700 hover:bg-slate-50'
@@ -137,11 +149,6 @@ export default function Navbar() {
                 }
               >
                 {link.label}
-                {link.to === '/favourites' && favoriteCount > 0 && (
-                  <span className="rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-extrabold text-white">
-                    {favoriteCount}
-                  </span>
-                )}
               </NavLink>
             ),
           )}

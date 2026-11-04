@@ -19,7 +19,7 @@ import FreshProperties from '../components/FreshProperties'
  * Each block is an independent component, so any section can be reordered,
  * reused on another page, or swapped for an API-driven version in isolation.
  */
-export default function Home({ onSearchResultsVisibilityChange }) {
+export default function Home() {
   const [searchFilters, setSearchFilters] = useState(null)
 
   useEffect(() => {
@@ -36,18 +36,13 @@ export default function Home({ onSearchResultsVisibilityChange }) {
   /**
    * Show local matching listings below the hero without leaving the home page.
    */
-  const handleSearch = useCallback(
-    (filters) => {
-      setSearchFilters(filters)
-      onSearchResultsVisibilityChange?.(true)
-    },
-    [onSearchResultsVisibilityChange],
-  )
+  const handleSearch = useCallback((filters) => {
+    setSearchFilters(filters)
+  }, [])
 
   const clearSearch = useCallback(() => {
     setSearchFilters(null)
-    onSearchResultsVisibilityChange?.(false)
-  }, [onSearchResultsVisibilityChange])
+  }, [])
 
   return (
     <>

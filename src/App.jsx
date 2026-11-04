@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { SearchX } from 'lucide-react'
 
 import Navbar from './components/Navbar'
+import GetTheApp from './components/GetTheApp'
 import Footer from './components/Footer'
 import RoleGate from './components/RoleGate'
 import ScrollToTop from './components/ScrollToTop'
@@ -23,6 +24,7 @@ import MyRecommendations from './pages/MyRecommendations'
 import CreateRecommendation from './pages/CreateRecommendation'
 import AdminRecommendations from './pages/AdminRecommendations'
 import Favourites from './pages/Favourites'
+import Profile from './pages/Profile'
 import ComingSoon from './pages/ComingSoon'
 
 /**
@@ -42,39 +44,22 @@ import ComingSoon from './pages/ComingSoon'
  *   src/pages/PropertyDetails.jsx ->  /properties/:id
  *   src/pages/AdvancedBooking.jsx ->  /advanced-booking
  *
- * /plots and /plots/:id are live: Plots is the scrollable card-only inventory
- * that every "Browse all plots" action opens, and PlotDetail (reachable from
- * every "Exclusive Featured Plots" card) is the single-plot screen. Neither
- * renders the shared Footer, and the /plots inventory screen drops the Navbar
- * as well so the cards are the only thing on it.
- *
- * /properties and /properties/:id follow the same card-only inventory and
- * detail flow for freshly added properties.
- *
- * /agents, /properties, /plots and their :id detail routes drop the shared
- * Navbar / Footer (each detail page keeps its own back control).
- * /advanced-booking (+ :id detail) mirrors plots/properties inventory (no shell).
- * /agents-recommend (+ detail), /my-recommendations and /admin/recommendations
- * keep the shared Navbar / Footer shell.
+ * Footer always renders on every route. Some inventory / detail routes still
+ * hide the shared Navbar (they keep their own back controls).
  */
 const AGENT_PROFILE_ROUTE = /^\/agents\/[^/]+\/?$/
-/* The card-only agents inventory — no Navbar, no Footer. */
 const AGENTS_INDEX_ROUTE = /^\/agents\/?$/
-/* The card-only plots inventory — no Navbar, no Footer. */
 const PLOTS_INDEX_ROUTE = /^\/plots\/?$/
-/* The card-only properties inventory — no Navbar, no Footer. */
 const PROPERTIES_INDEX_ROUTE = /^\/properties\/?$/
-/* A single plot — no Navbar, no Footer (own back control on the page). */
 const PLOT_DETAIL_ROUTE = /^\/plots\/[^/]+\/?$/
-/* A single property — no Navbar, no Footer (own back control on the page). */
 const PROPERTY_DETAIL_ROUTE = /^\/properties\/[^/]+\/?$/
 const ADVANCED_BOOKING_ROUTE = /^\/advanced-booking\/?$/
 const ADVANCED_BOOKING_DETAIL_ROUTE = /^\/advanced-booking\/[^/]+\/?$/
 
 export default function App() {
   const [hasEntered, setHasEntered] = useState(false)
-  const [isHomeSearchResults, setIsHomeSearchResults] = useState(false)
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const isAgentProfile = AGENT_PROFILE_ROUTE.test(pathname)
   const isAgentsIndex = AGENTS_INDEX_ROUTE.test(pathname)
   const isPlotsIndex = PLOTS_INDEX_ROUTE.test(pathname)
@@ -83,7 +68,7 @@ export default function App() {
   const isPropertyDetail = PROPERTY_DETAIL_ROUTE.test(pathname)
   const isAdvancedBooking = ADVANCED_BOOKING_ROUTE.test(pathname)
   const isAdvancedBookingDetail = ADVANCED_BOOKING_DETAIL_ROUTE.test(pathname)
-  const showShell =
+  const showNavbar =
     !isAgentProfile &&
     !isAgentsIndex &&
     !isPlotsIndex &&
@@ -93,26 +78,29 @@ export default function App() {
     !isAdvancedBooking &&
     !isAdvancedBookingDetail
 
-  useEffect(() => {
-    if (pathname !== '/') setIsHomeSearchResults(false)
-  }, [pathname])
+  function handleSignOut() {
+    navigate('/', { replace: true })
+    setHasEntered(false)
+  }
+
+  function handleEnter() {
+    navigate('/', { replace: true })
+    setHasEntered(true)
+  }
 
   return (
     <>
-      <RoleGate open={!hasEntered} onEnter={() => setHasEntered(true)} />
+      <RoleGate open={!hasEntered} onEnter={handleEnter} />
 
       {/* While the gate is open the shell stays inert — visible behind it, but
           not clickable, focusable or exposed to assistive technology. */}
       <div inert={!hasEntered} className="flex min-h-screen flex-col bg-offwhite">
         <ScrollToTop />
-        {showShell && <Navbar />}
+        {showNavbar && <Navbar onSignOut={handleSignOut} />}
 
         <main className="flex-1">
           <Routes>
-            <Route
-              path="/"
-              element={<Home onSearchResultsVisibilityChange={setIsHomeSearchResults} />}
-            />
+            <Route path="/" element={<Home />} />
 
             <Route path="/about" element={<About />} />
 
@@ -120,12 +108,11 @@ export default function App() {
 
             <Route path="/favourites" element={<Favourites />} />
 
+            <Route path="/profile" element={<Profile />} />
+
             <Route path="/properties" element={<Properties />} />
 
-            <Route
-              path="/properties/:id"
-              element={<PropertyDetail />}
-            />
+            <Route path="/properties/:id" element={<PropertyDetail />} />
 
             <Route path="/plots" element={<Plots />} />
 
@@ -165,7 +152,8 @@ export default function App() {
           </Routes>
         </main>
 
-        {showShell && !isHomeSearchResults && <Footer />}
+        <GetTheApp />
+        <Footer />
       </div>
     </>
   )
