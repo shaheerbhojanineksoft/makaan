@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Building2,
-  ChevronDown,
   KeyRound,
   LandPlot,
   MapPin,
@@ -14,6 +13,7 @@ import { areasForCity, CITIES, PRICE, PROPERTY_TYPES } from '../data/filters'
 import { HERO_STATS, SITE } from '../data/siteConfig'
 import { formatPKR } from '../utils/format'
 import { ASK_MAKAN_EXAMPLES, parseSearchIntent } from '../utils/parseSearchIntent'
+import SearchableSelect from './ui/SearchableSelect'
 
 const TABS = [
   { id: 'buy', label: 'Buy', icon: Building2, priceLabel: 'Max Budget' },
@@ -173,7 +173,7 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
   }
 
   return (
-    <section className="relative isolate overflow-hidden">
+    <section className="relative isolate overflow-x-clip">
       <div className="absolute inset-0 -z-20 bg-brand" aria-hidden="true">
         <img
           src={SITE.heroImage}
@@ -204,7 +204,7 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
           </p>
         </div>
 
-        <div className="animate-fade-up mx-auto mt-10 max-w-5xl rounded-3xl border border-white/25 bg-white/10 p-3 shadow-glass backdrop-blur-xl sm:p-4">
+        <div className="animate-fade-up relative z-30 mx-auto mt-10 max-w-5xl overflow-visible rounded-3xl border border-white/25 bg-white/10 p-3 shadow-glass backdrop-blur-xl sm:p-4">
           {/* Search mode: Filters vs Ask Makan */}
           <div
             role="tablist"
@@ -262,83 +262,50 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
                 })}
               </div>
 
-              <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-12">
-                <label className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 shadow-sm transition focus-within:ring-2 focus-within:ring-brand-light/50 lg:col-span-2">
-                  <MapPin className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-                  <span className="sr-only">City</span>
-                  <select
-                    aria-required="true"
-                    aria-invalid={Boolean(validationMessage && !city)}
-                    value={city}
-                    onChange={(event) => {
-                      setCity(event.target.value)
-                      setArea('')
-                      setValidationMessage('')
-                    }}
-                    className="w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-slate-800 outline-none"
-                  >
-                    <option value="">All Cities</option>
-                    {CITIES.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    className="pointer-events-none h-4 w-4 shrink-0 text-slate-400"
-                    aria-hidden="true"
-                  />
-                </label>
+              <div className="relative z-20 grid items-stretch gap-3 overflow-visible sm:grid-cols-2 lg:grid-cols-12">
+                <SearchableSelect
+                  className="lg:col-span-2"
+                  icon={MapPin}
+                  label="City"
+                  value={city}
+                  options={CITIES}
+                  emptyLabel="All Cities"
+                  required
+                  invalid={Boolean(validationMessage && !city)}
+                  onChange={(next) => {
+                    setCity(next)
+                    setArea('')
+                    setValidationMessage('')
+                  }}
+                />
 
-                <label className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 shadow-sm transition focus-within:ring-2 focus-within:ring-brand-light/50 lg:col-span-3">
-                  <LandPlot className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-                  <span className="sr-only">Area</span>
-                  <select
-                    value={area}
-                    onChange={(event) => {
-                      setArea(event.target.value)
-                      setValidationMessage('')
-                    }}
-                    className="w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-slate-800 outline-none"
-                  >
-                    <option value="">All Areas</option>
-                    {areaOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    className="pointer-events-none h-4 w-4 shrink-0 text-slate-400"
-                    aria-hidden="true"
-                  />
-                </label>
+                <SearchableSelect
+                  className="lg:col-span-3"
+                  icon={LandPlot}
+                  label="Area"
+                  value={area}
+                  options={areaOptions}
+                  emptyLabel="All Areas"
+                  onChange={(next) => {
+                    setArea(next)
+                    setValidationMessage('')
+                  }}
+                />
 
-                <label className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 shadow-sm transition focus-within:ring-2 focus-within:ring-brand-light/50 lg:col-span-2">
-                  <Building2 className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-                  <span className="sr-only">Property type</span>
-                  <select
-                    aria-required="true"
-                    aria-invalid={Boolean(validationMessage && !propertyType)}
-                    value={propertyType}
-                    onChange={(event) => {
-                      setPropertyType(event.target.value)
-                      setValidationMessage('')
-                    }}
-                    className="w-full cursor-pointer appearance-none bg-transparent text-sm font-semibold text-slate-800 outline-none"
-                  >
-                    <option value="">All Property Types</option>
-                    {typeOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    className="pointer-events-none h-4 w-4 shrink-0 text-slate-400"
-                    aria-hidden="true"
-                  />
-                </label>
+                <SearchableSelect
+                  className="lg:col-span-2"
+                  icon={Building2}
+                  label="Property type"
+                  value={propertyType}
+                  options={typeOptions}
+                  emptyLabel="All Property Types"
+                  required
+                  invalid={Boolean(validationMessage && !propertyType)}
+                  onChange={(next) => {
+                    setPropertyType(next)
+                    setValidationMessage('')
+                  }}
+                />
 
                 <div className="flex flex-col justify-center rounded-xl bg-white px-3 py-2.5 shadow-sm sm:col-span-2 lg:col-span-3">
                   <div className="flex items-center justify-between gap-3">
