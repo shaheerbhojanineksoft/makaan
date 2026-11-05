@@ -14,7 +14,7 @@ import {
 
 import Badge from '../components/ui/Badge'
 import FavoriteButton from '../components/FavoriteButton'
-import { featuredAgents } from '../data/agents'
+import { getMergedAgents, useAgencyStore } from '../utils/agencyStore'
 import { FAVORITE_KINDS } from '../utils/favorites'
 
 const INITIAL_FILTERS = {
@@ -22,7 +22,9 @@ const INITIAL_FILTERS = {
   keyword: '',
 }
 
-const CITIES = [...new Set(featuredAgents.map((agent) => agent.city))].sort()
+function citiesFrom(agents) {
+  return [...new Set(agents.map((agent) => agent.city))].sort()
+}
 
 function matchesFilters(agent, filters) {
   if (filters.city && agent.city !== filters.city) return false
@@ -151,7 +153,16 @@ function AgentCard({ agent }) {
   )
 }
 
-function AgentFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCloseMobile }) {
+function AgentFilters({
+  filters,
+  onChange,
+  onReset,
+  resultCount,
+  inventoryCount,
+  cities,
+  mobileOpen,
+  onCloseMobile,
+}) {
   const hasActiveFilters = filters.city !== '' || filters.keyword.trim() !== ''
 
   const content = (
@@ -209,14 +220,14 @@ function AgentFilters({ filters, onChange, onReset, resultCount, mobileOpen, onC
             icon={MapPin}
             value={filters.city}
             onChange={(city) => onChange({ ...filters, city })}
-            options={CITIES}
+            options={cities}
             placeholder="All cities"
           />
         </FilterField>
       </div>
 
       <p className="mt-6 border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500">
-        Showing <span className="font-bold text-brand">{resultCount}</span> of {featuredAgents.length}{' '}
+        Showing <span className="font-bold text-brand">{resultCount}</span> of {inventoryCount}{' '}
         agents
       </p>
     </>
@@ -252,12 +263,15 @@ function AgentFilters({ filters, onChange, onReset, resultCount, mobileOpen, onC
  * rendered around this route. Each card opens `/agents/:id`.
  */
 export default function Agents() {
+  const agencyVersion = useAgencyStore()
+  const agents = useMemo(() => getMergedAgents(), [agencyVersion])
+  const cities = useMemo(() => citiesFrom(agents), [agents])
   const [filters, setFilters] = useState(INITIAL_FILTERS)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const filtered = useMemo(
-    () => featuredAgents.filter((agent) => matchesFilters(agent, filters)),
-    [filters],
+    () => agents.filter((agent) => matchesFilters(agent, filters)),
+    [agents, filters],
   )
 
   return (
@@ -268,6 +282,8 @@ export default function Agents() {
           onChange={setFilters}
           onReset={() => setFilters(INITIAL_FILTERS)}
           resultCount={filtered.length}
+          inventoryCount={agents.length}
+          cities={cities}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 import PropertyCard from '../components/PropertyCard'
-import { freshProperties } from '../data/properties'
+import { getMergedProperties, useAgencyStore } from '../utils/agencyStore'
 import { formatPKR } from '../utils/format'
 
 const PURPOSE_OPTIONS = [
@@ -69,11 +69,15 @@ const INITIAL_FILTERS = {
   sort: 'newest',
 }
 
-const CITIES = [...new Set(freshProperties.map((p) => p.city))].sort()
-const PROPERTY_TYPES = [...new Set(freshProperties.map((p) => p.propertyType))].sort()
+function catalogMeta(catalog) {
+  return {
+    cities: [...new Set(catalog.map((p) => p.city))].sort(),
+    propertyTypes: [...new Set(catalog.map((p) => p.propertyType))].sort(),
+  }
+}
 
-function areasForCity(city) {
-  const source = city ? freshProperties.filter((p) => p.city === city) : freshProperties
+function areasForCity(city, catalog) {
+  const source = city ? catalog.filter((p) => p.city === city) : catalog
   return [...new Set(source.map((p) => p.location))].sort()
 }
 
@@ -232,8 +236,18 @@ function PriceInput({ value, onChange, placeholder }) {
   )
 }
 
-function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCloseMobile }) {
-  const areas = areasForCity(filters.city)
+function PropertyFilters({
+  filters,
+  onChange,
+  onReset,
+  resultCount,
+  inventoryCount,
+  cities,
+  propertyTypes,
+  areas,
+  mobileOpen,
+  onCloseMobile,
+}) {
   const hasActiveFilters = buildActiveChips(filters).length > 0
 
   const content = (
@@ -284,7 +298,7 @@ function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, 
             icon={MapPin}
             value={filters.city}
             onChange={(city) => onChange({ ...filters, city, area: '' })}
-            options={CITIES}
+            options={cities}
             placeholder="All cities"
           />
         </FilterField>
@@ -303,7 +317,7 @@ function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, 
             icon={Building2}
             value={filters.propertyType}
             onChange={(propertyType) => onChange({ ...filters, propertyType })}
-            options={PROPERTY_TYPES}
+            options={propertyTypes}
             placeholder="All types"
           />
         </FilterField>
@@ -367,7 +381,7 @@ function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, 
 
       <p className="mt-6 border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500">
         Showing <span className="font-bold text-brand">{resultCount}</span> of{' '}
-        {freshProperties.length} properties
+        {inventoryCount} properties
       </p>
     </>
   )
@@ -401,19 +415,23 @@ function PropertyFilters({ filters, onChange, onReset, resultCount, mobileOpen, 
  * Filters sit in a full-height left rail on desktop; listings fill the rest.
  */
 export default function Properties() {
+  const agencyVersion = useAgencyStore()
+  const catalog = useMemo(() => getMergedProperties(), [agencyVersion])
+  const { cities, propertyTypes } = catalogMeta(catalog)
   const [filters, setFilters] = useState(INITIAL_FILTERS)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const filtered = useMemo(
     () =>
       sortProperties(
-        freshProperties.filter((property) => matchesFilters(property, filters)),
+        catalog.filter((property) => matchesFilters(property, filters)),
         filters.sort,
       ),
-    [filters],
+    [catalog, filters],
   )
 
   const chips = useMemo(() => buildActiveChips(filters), [filters])
+  const areas = areasForCity(filters.city, catalog)
 
   const clearAll = () => setFilters(INITIAL_FILTERS)
 
@@ -429,6 +447,10 @@ export default function Properties() {
           onChange={setFilters}
           onReset={clearAll}
           resultCount={filtered.length}
+          inventoryCount={catalog.length}
+          cities={cities}
+          propertyTypes={propertyTypes}
+          areas={areas}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />

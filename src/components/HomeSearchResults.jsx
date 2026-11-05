@@ -5,9 +5,8 @@ import PlotCard from './PlotCard'
 import FavoriteButton from './FavoriteButton'
 import SectionHeading from './ui/SectionHeading'
 import { FAVORITE_KINDS } from '../utils/favorites'
-import { featuredPlots } from '../data/plots'
-import { freshProperties } from '../data/properties'
 import { trendingProjects } from '../data/projects'
+import { getMergedPlots, getMergedProperties } from '../utils/agencyStore'
 import { formatMonthYear, formatPKR } from '../utils/format'
 
 function matchesPropertyType(property, selectedType) {
@@ -106,7 +105,7 @@ function getMatches(filters) {
 
   const purpose = filters.purpose === 'rent' ? 'rent' : 'sale'
 
-  const properties = freshProperties.filter((property) => {
+  const properties = getMergedProperties().filter((property) => {
     if (city && property.city !== city) return false
     if (area && property.location !== area) return false
     if (property.purpose !== purpose) return false
@@ -131,7 +130,7 @@ function getMatches(filters) {
       propertyType === 'Commercial Plot')
 
   const plots = wantsPlots
-    ? featuredPlots.filter((plot) => {
+    ? getMergedPlots().filter((plot) => {
         if (city && plot.city !== city) return false
         if (area && plot.location !== area) return false
         if (propertyType && `${plot.plotType} Plot` !== propertyType) return false

@@ -2,9 +2,12 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import SectionHeading from './ui/SectionHeading'
 import PlotCard from './PlotCard'
-import { featuredPlots } from '../data/plots'
+import { getMergedPlots, useAgencyStore } from '../utils/agencyStore'
 
 export default function FeaturedPlots() {
+  useAgencyStore()
+  const plots = getMergedPlots().slice(0, 6)
+
   return (
     <section id="featured-plots" className="bg-white py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
@@ -23,7 +26,7 @@ export default function FeaturedPlots() {
         />
 
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredPlots.map((plot) => (
+          {plots.map((plot) => (
             <PlotCard key={plot.id} plot={plot} />
           ))}
         </div>

@@ -22,7 +22,7 @@ import {
 
 import FavoriteButton from '../components/FavoriteButton'
 import { AGENCY_SERVICES, getAgentById } from '../data/agents'
-import { freshProperties } from '../data/properties'
+import { getMergedProperties, useAgencyStore } from '../utils/agencyStore'
 import { FAVORITE_KINDS } from '../utils/favorites'
 import { formatPKR } from '../utils/format'
 
@@ -161,7 +161,13 @@ function ListingCard({ listing }) {
 }
 
 function ProfileContent({ agent, backTo }) {
-  const listings = freshProperties.filter((property) => property.agent.name === agent.name)
+  useAgencyStore()
+  const listings = getMergedProperties().filter(
+    (property) =>
+      property.agentId === agent.id ||
+      property.agent?.name === agent.name ||
+      property.agent?.agency === agent.agency,
+  )
   const backIsAgents = backTo === '/agents'
 
   return (
@@ -247,7 +253,7 @@ function ProfileContent({ agent, backTo }) {
 
           <InfoSection icon={ShieldCheck} title="Services Offered">
             <ul className="grid gap-3 sm:grid-cols-2">
-              {AGENCY_SERVICES.map((service) => (
+              {(agent.services?.length ? agent.services : AGENCY_SERVICES).map((service) => (
                 <li key={service} className="flex items-start gap-2.5 text-sm text-slate-600">
                   <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-soft text-brand">
                     <Check className="h-3 w-3" strokeWidth={3} aria-hidden="true" />

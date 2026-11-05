@@ -559,8 +559,8 @@ export function createRecommendationId() {
   return `rec-${Date.now()}`
 }
 
-/** Demo agency session — first verified agent acts as the logged-in agency user. */
-export const DEMO_AGENCY_AGENT_ID = 'ag-004'
+/** Demo agency session — Raza Estates (matches session.DEMO_AGENCY_ID). */
+export const DEMO_AGENCY_AGENT_ID = 'ag-001'
 
 const SAVED_KEY = 'makaan-saved-recommendations'
 

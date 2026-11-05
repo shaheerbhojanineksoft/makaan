@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 
 import BookingProjectCard from '../components/BookingProjectCard'
-import { bookingProjects } from '../data/projects'
+import { getMergedProjects, useAgencyStore } from '../utils/agencyStore'
 import { formatPKR } from '../utils/format'
 
 const PROJECT_TYPES = [
@@ -60,13 +60,13 @@ const INITIAL_FILTERS = {
   amenities: [],
 }
 
-const CITIES = [...new Set(bookingProjects.map((p) => p.city))].sort()
+function citiesFrom(catalog) {
+  return [...new Set(catalog.map((p) => p.city))].sort()
+}
 
-function areasForCity(city) {
-  const source = city
-    ? bookingProjects.filter((p) => p.city === city)
-    : bookingProjects
-  return [...new Set(source.map((p) => p.area))].sort()
+function areasForCity(city, catalog) {
+  const source = city ? catalog.filter((p) => p.city === city) : catalog
+  return [...new Set(source.map((p) => p.area).filter(Boolean))].sort()
 }
 
 function parsePriceInput(value) {
@@ -217,10 +217,12 @@ function BookingFilters({
   onApply,
   onClear,
   resultCount,
+  inventoryCount,
+  cities,
+  areas,
   mobileOpen,
   onCloseMobile,
 }) {
-  const areas = areasForCity(draft.city)
 
   const toggleAmenity = (amenity) => {
     const next = draft.amenities.includes(amenity)
@@ -266,7 +268,7 @@ function BookingFilters({
             icon={MapPin}
             value={draft.city}
             onChange={(city) => onDraftChange({ ...draft, city, area: '' })}
-            options={CITIES}
+            options={cities}
             placeholder="All cities"
           />
         </FilterField>
@@ -368,7 +370,7 @@ function BookingFilters({
         </button>
         <p className="text-center text-xs font-semibold text-slate-500">
           Showing <span className="font-bold text-brand">{resultCount}</span> of{' '}
-          {bookingProjects.length} projects
+          {inventoryCount} projects
         </p>
       </div>
     </>
@@ -404,16 +406,20 @@ function BookingFilters({
  * around this route (same shell pattern as `/plots` and `/properties`).
  */
 export default function AdvanceBooking() {
+  const agencyVersion = useAgencyStore()
+  const catalog = useMemo(() => getMergedProjects(), [agencyVersion])
+  const cities = useMemo(() => citiesFrom(catalog), [catalog])
   const [draft, setDraft] = useState(INITIAL_FILTERS)
   const [applied, setApplied] = useState(INITIAL_FILTERS)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const filtered = useMemo(
-    () => bookingProjects.filter((project) => matchesFilters(project, applied)),
-    [applied],
+    () => catalog.filter((project) => matchesFilters(project, applied)),
+    [catalog, applied],
   )
 
   const chips = useMemo(() => buildActiveChips(applied), [applied])
+  const areas = areasForCity(draft.city, catalog)
 
   const applyFilters = () => {
     setApplied(draft)
@@ -437,6 +443,9 @@ export default function AdvanceBooking() {
         <BookingFilters
           draft={draft}
           onDraftChange={setDraft}
+          inventoryCount={catalog.length}
+          cities={cities}
+          areas={areas}
           onApply={applyFilters}
           onClear={clearAll}
           resultCount={filtered.length}

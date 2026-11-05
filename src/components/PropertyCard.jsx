@@ -26,7 +26,7 @@ export default function PropertyCard({ property }) {
         className="absolute inset-0 z-10 rounded-2xl"
       />
 
-      <div className="relative aspect-4/3 overflow-hidden rounded-t-2xl bg-brand-soft">
+      <div className="relative aspect-[5/4] min-h-[13.5rem] overflow-hidden rounded-t-2xl bg-brand-soft">
         <img
           src={property.image}
           alt={property.title}
@@ -50,16 +50,16 @@ export default function PropertyCard({ property }) {
 
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display text-[15px] leading-snug font-bold text-slate-900 transition group-hover:text-brand">
+          <h3 className="font-display text-lg leading-snug font-bold text-slate-900 transition group-hover:text-brand">
             {property.title}
           </h3>
-          <Badge variant="green" className="shrink-0">
+          <Badge variant="green" className="shrink-0 !text-xs">
             {property.propertyType}
           </Badge>
         </div>
 
-        <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-          <MapPin className="h-3.5 w-3.5 shrink-0 text-brand" aria-hidden="true" />
+        <p className="mt-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-500">
+          <MapPin className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
           {property.location}
         </p>
 

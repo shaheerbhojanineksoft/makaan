@@ -239,9 +239,35 @@ export const freshProperties = [
 ]
 
 export function getPropertyById(id) {
-  return freshProperties.find((property) => property.id === id)
+  const base = freshProperties.find((property) => property.id === id)
+  if (typeof window === 'undefined') return base
+  try {
+    const all = JSON.parse(localStorage.getItem('makan-agency-listings-v1') || '{}')
+    for (const list of Object.values(all)) {
+      const match = (list || []).find((item) => item.id === id && item.kind !== 'plot')
+      if (match) return match.disabled ? undefined : match
+    }
+  } catch {
+    /* ignore */
+  }
+  return base
 }
 
 export function getOtherProperties(id, limit = 3) {
-  return freshProperties.filter((property) => property.id !== id).slice(0, limit)
+  let catalog = freshProperties
+  if (typeof window !== 'undefined') {
+    try {
+      const all = JSON.parse(localStorage.getItem('makan-agency-listings-v1') || '{}')
+      const byId = new Map(freshProperties.map((item) => [item.id, item]))
+      Object.values(all).forEach((list) => {
+        ;(list || []).forEach((item) => {
+          if (item.kind !== 'plot') byId.set(item.id, item)
+        })
+      })
+      catalog = [...byId.values()]
+    } catch {
+      /* ignore */
+    }
+  }
+  return catalog.filter((property) => property.id !== id).slice(0, limit)
 }

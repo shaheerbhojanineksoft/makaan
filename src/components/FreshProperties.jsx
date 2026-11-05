@@ -2,9 +2,12 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import SectionHeading from './ui/SectionHeading'
 import PropertyCard from './PropertyCard'
-import { freshProperties } from '../data/properties'
+import { getMergedProperties, useAgencyStore } from '../utils/agencyStore'
 
 export default function FreshProperties() {
+  useAgencyStore()
+  const properties = getMergedProperties().slice(0, 8)
+
   return (
     <section id="fresh-properties" className="bg-brand-soft py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
@@ -23,7 +26,7 @@ export default function FreshProperties() {
         />
 
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {freshProperties.map((property) => (
+          {properties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>

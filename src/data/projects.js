@@ -571,7 +571,26 @@ export const trendingProjects = bookingProjects.map((project) => ({
 }))
 
 export function getProjectById(id) {
-  return bookingProjects.find((project) => project.id === id)
+  const base = bookingProjects.find((project) => project.id === id)
+  if (typeof window === 'undefined') return base
+  try {
+    const all = JSON.parse(localStorage.getItem('makan-agency-listings-v1') || '{}')
+    for (const list of Object.values(all)) {
+      const match = (list || []).find((item) => item.id === id && item.kind === 'booking')
+      if (match) {
+        if (match.disabled) return undefined
+        return {
+          ...match,
+          name: match.name || match.title,
+          startingPrice: match.startingPrice ?? match.price,
+          gallery: match.images?.length ? match.images : match.gallery || [match.image].filter(Boolean),
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return base
 }
 
 export function getOtherProjects(id, limit = 3) {

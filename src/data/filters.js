@@ -33,13 +33,15 @@ export function areasForCity(city = '') {
 
 export const PROPERTY_TYPES = [
   'House',
+  'Villa',
   'Flat / Apartment',
-  'Residential Plot',
-  'Commercial Plot',
   'Farm House',
+  'Bungalow',
   'Shop',
   'Office',
   'Building',
+  'Residential Plot',
+  'Commercial Plot',
 ]
 
 export const PROJECT_TYPES = [

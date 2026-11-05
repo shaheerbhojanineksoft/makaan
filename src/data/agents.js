@@ -21,6 +21,25 @@ export const AGENCY_SERVICES = [
   'Overseas investor advisory and video tours',
 ]
 
+export const AGENCY_SPECIALIZATIONS = [
+  'Residential Sales',
+  'Luxury Villas',
+  'Apartments & Flats',
+  'Family Homes',
+  'Farm Houses',
+  'Rentals & Leasing',
+  'Commercial Spaces',
+  'Commercial Offices',
+  'Residential Plots',
+  'Commercial Land',
+  'Land & Plots',
+  'Housing Society Files',
+  'New Builds & Construction',
+  'Overseas Investor Deals',
+  'Investment Plots',
+  'Rental Management',
+]
+
 export const featuredAgents = [
   {
     id: 'ag-001',
@@ -284,7 +303,17 @@ export const featuredAgents = [
  * Looks up a single expert by id — the data source for the `/agents/:id`
  * profile screen. Returns `undefined` when the id is unknown so the screen can
  * render its own not-found state.
+ *
+ * Agency-panel edits (localStorage) are merged on top of seed data when present.
  */
 export function getAgentById(id) {
-  return featuredAgents.find((agent) => agent.id === id)
+  const base = featuredAgents.find((agent) => agent.id === id)
+  if (!base || typeof window === 'undefined') return base
+  try {
+    const overrides = JSON.parse(localStorage.getItem('makan-agency-profiles-v1') || '{}')
+    if (!overrides[id]) return base
+    return { ...base, ...overrides[id] }
+  } catch {
+    return base
+  }
 }

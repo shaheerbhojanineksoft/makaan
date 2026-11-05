@@ -25,7 +25,7 @@ export default function PlotCard({ plot }) {
       />
 
       {/* Media */}
-      <div className="relative aspect-4/3 overflow-hidden rounded-t-2xl bg-brand-soft">
+      <div className="relative aspect-[5/4] min-h-[13.5rem] overflow-hidden rounded-t-2xl bg-brand-soft">
         <img
           src={plot.image}
           alt={plot.title}
@@ -60,16 +60,16 @@ export default function PlotCard({ plot }) {
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display text-base font-bold text-slate-900 transition group-hover:text-brand">
+          <h3 className="font-display text-lg font-bold text-slate-900 transition group-hover:text-brand">
             {plot.title}
           </h3>
-          <Badge variant="green" className="shrink-0">
+          <Badge variant="green" className="shrink-0 !text-xs">
             {plot.plotType}
           </Badge>
         </div>
 
-        <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-          <MapPin className="h-3.5 w-3.5 shrink-0 text-brand" aria-hidden="true" />
+        <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-slate-500">
+          <MapPin className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
           {plot.location}
         </p>
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ImagePlus, Save, Send } from 'lucide-react'
 
 import {
@@ -12,6 +12,7 @@ import {
   upsertRecommendation,
 } from '../data/recommendations'
 import { bookingProjects } from '../data/projects'
+import { getSession } from '../utils/session'
 
 const FIELD =
   'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none transition placeholder:font-medium placeholder:text-slate-400 focus:border-brand/40 focus:ring-2 focus:ring-brand/15'
@@ -56,6 +57,11 @@ function Field({ label, children, hint }) {
 export default function CreateRecommendation() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const inAgencyPanel = pathname.startsWith('/agency')
+  const listPath = inAgencyPanel ? '/agency/recommendations' : '/my-recommendations'
+  const session = getSession()
+  const agencyAgentId = session.agencyId || DEMO_AGENCY_AGENT_ID
   const existing = id ? getRecommendationById(id) : null
 
   const initial = useMemo(() => {
@@ -139,7 +145,7 @@ export default function CreateRecommendation() {
       agentOpinionNote: form.agentOpinionNote.trim(),
       relatedProjectId: form.relatedProjectId,
       relatedPropertyIds: existing?.relatedPropertyIds || [],
-      agentId: existing?.agentId || DEMO_AGENCY_AGENT_ID,
+      agentId: existing?.agentId || agencyAgentId,
       status,
       publishedAt: status === 'published' ? now : existing?.publishedAt || '',
       createdAt: existing?.createdAt || now,
@@ -153,18 +159,18 @@ export default function CreateRecommendation() {
     const payload = buildPayload(status)
     if (!payload) return
     upsertRecommendation(payload)
-    navigate('/my-recommendations')
+    navigate(listPath)
   }
 
   return (
-    <section className="min-h-screen bg-offwhite">
-      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+    <section className={inAgencyPanel ? '' : 'min-h-screen bg-offwhite'}>
+      <div className={inAgencyPanel ? 'max-w-4xl' : 'mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8'}>
         <Link
-          to="/my-recommendations"
+          to={listPath}
           className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-brand transition hover:bg-brand-soft"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to My Recommendations
+          Back to recommendations
         </Link>
 
         <h1 className="mt-6 font-display text-3xl font-extrabold text-slate-900">

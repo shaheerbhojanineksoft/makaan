@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 import PlotCard from '../components/PlotCard'
-import { featuredPlots } from '../data/plots'
+import { getMergedPlots, useAgencyStore } from '../utils/agencyStore'
 import { formatPKR } from '../utils/format'
 
 const TYPE_OPTIONS = [
@@ -43,8 +43,6 @@ const SORT_OPTIONS = [
   { value: 'price-desc', label: 'Price: High to Low' },
 ]
 
-const FEATURE_TAGS = [...new Set(featuredPlots.flatMap((plot) => plot.tags ?? []))].sort()
-
 const INITIAL_FILTERS = {
   keyword: '',
   plotType: 'all',
@@ -58,10 +56,15 @@ const INITIAL_FILTERS = {
   sort: 'newest',
 }
 
-const CITIES = [...new Set(featuredPlots.map((p) => p.city))].sort()
+function catalogMeta(catalog) {
+  return {
+    cities: [...new Set(catalog.map((p) => p.city))].sort(),
+    featureTags: [...new Set(catalog.flatMap((plot) => plot.tags ?? []))].sort(),
+  }
+}
 
-function areasForCity(city) {
-  const source = city ? featuredPlots.filter((p) => p.city === city) : featuredPlots
+function areasForCity(city, catalog) {
+  const source = city ? catalog.filter((p) => p.city === city) : catalog
   return [...new Set(source.map((p) => p.location))].sort()
 }
 
@@ -224,8 +227,18 @@ function PriceInput({ value, onChange, placeholder }) {
   )
 }
 
-function PlotFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCloseMobile }) {
-  const areas = areasForCity(filters.city)
+function PlotFilters({
+  filters,
+  onChange,
+  onReset,
+  resultCount,
+  inventoryCount,
+  cities,
+  areas,
+  featureTags,
+  mobileOpen,
+  onCloseMobile,
+}) {
   const hasActiveFilters = buildActiveChips(filters).length > 0
 
   const toggleFeature = (feature) => {
@@ -283,7 +296,7 @@ function PlotFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCl
             icon={MapPin}
             value={filters.city}
             onChange={(city) => onChange({ ...filters, city, area: '' })}
-            options={CITIES}
+            options={cities}
             placeholder="All cities"
           />
         </FilterField>
@@ -343,10 +356,10 @@ function PlotFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCl
           </div>
         </FilterField>
 
-        {FEATURE_TAGS.length > 0 && (
+        {featureTags.length > 0 && (
           <FilterField label="Features">
             <div className="flex flex-wrap gap-2">
-              {FEATURE_TAGS.map((feature) => {
+              {featureTags.map((feature) => {
                 const selected = filters.features.includes(feature)
                 return (
                   <button
@@ -370,7 +383,7 @@ function PlotFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCl
       </div>
 
       <p className="mt-6 border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500">
-        Showing <span className="font-bold text-brand">{resultCount}</span> of {featuredPlots.length}{' '}
+        Showing <span className="font-bold text-brand">{resultCount}</span> of {inventoryCount}{' '}
         plots
       </p>
     </>
@@ -406,15 +419,19 @@ function PlotFilters({ filters, onChange, onReset, resultCount, mobileOpen, onCl
  * rendered around this route.
  */
 export default function Plots() {
+  const agencyVersion = useAgencyStore()
+  const catalog = useMemo(() => getMergedPlots(), [agencyVersion])
+  const { cities, featureTags } = catalogMeta(catalog)
   const [filters, setFilters] = useState(INITIAL_FILTERS)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const filtered = useMemo(
-    () => sortPlots(featuredPlots.filter((plot) => matchesFilters(plot, filters)), filters.sort),
-    [filters],
+    () => sortPlots(catalog.filter((plot) => matchesFilters(plot, filters)), filters.sort),
+    [catalog, filters],
   )
 
   const chips = useMemo(() => buildActiveChips(filters), [filters])
+  const areas = areasForCity(filters.city, catalog)
 
   const clearAll = () => setFilters(INITIAL_FILTERS)
 
@@ -430,6 +447,10 @@ export default function Plots() {
           onChange={setFilters}
           onReset={clearAll}
           resultCount={filtered.length}
+          inventoryCount={catalog.length}
+          cities={cities}
+          areas={areas}
+          featureTags={featureTags}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
         />

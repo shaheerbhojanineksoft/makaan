@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { SearchX } from 'lucide-react'
 
 import Navbar from './components/Navbar'
@@ -7,6 +6,7 @@ import GetTheApp from './components/GetTheApp'
 import Footer from './components/Footer'
 import RoleGate from './components/RoleGate'
 import ScrollToTop from './components/ScrollToTop'
+import AgencyShell from './components/agency/AgencyShell'
 import Home from './pages/Home'
 import About from './pages/About'
 import ContactUs from './pages/ContactUs'
@@ -26,27 +26,18 @@ import AdminRecommendations from './pages/AdminRecommendations'
 import Favourites from './pages/Favourites'
 import Profile from './pages/Profile'
 import ComingSoon from './pages/ComingSoon'
+import AgencyDashboard from './pages/agency/AgencyDashboard'
+import AgencyProfileEdit from './pages/agency/AgencyProfileEdit'
+import AgencyListings from './pages/agency/AgencyListings'
+import AgencyListingForm from './pages/agency/AgencyListingForm'
+import AgencyRecommendations from './pages/agency/AgencyRecommendations'
+import {
+  clearSession,
+  enterAsAgency,
+  enterAsUser,
+  useSession,
+} from './utils/session'
 
-/**
- * Application shell.
- *
- * On first load a role-selection gate (RoleGate) is layered over the app: the
- * seeker path dismisses it into the user-side flow below, while the agency path
- * is advertised but not yet available.
- *
- * The Home, About and Contact screens are fully implemented. Every other screen
- * listed in the project brief is already wired to a route so it can be dropped
- * in later as a dedicated page component without touching this file's structure:
- *
- *   src/pages/About.jsx           ->  /about
- *   src/pages/ContactUs.jsx       ->  /contact
- *   src/pages/Properties.jsx      ->  /properties
- *   src/pages/PropertyDetails.jsx ->  /properties/:id
- *   src/pages/AdvancedBooking.jsx ->  /advanced-booking
- *
- * Footer always renders on every route. Some inventory / detail routes still
- * hide the shared Navbar (they keep their own back controls).
- */
 const AGENT_PROFILE_ROUTE = /^\/agents\/[^/]+\/?$/
 const AGENTS_INDEX_ROUTE = /^\/agents\/?$/
 const PLOTS_INDEX_ROUTE = /^\/plots\/?$/
@@ -57,9 +48,12 @@ const ADVANCED_BOOKING_ROUTE = /^\/advanced-booking\/?$/
 const ADVANCED_BOOKING_DETAIL_ROUTE = /^\/advanced-booking\/[^/]+\/?$/
 
 export default function App() {
-  const [hasEntered, setHasEntered] = useState(false)
+  const session = useSession()
+  const hasEntered = Boolean(session.role)
+  const isAgency = session.role === 'agency'
   const { pathname } = useLocation()
   const navigate = useNavigate()
+
   const isAgentProfile = AGENT_PROFILE_ROUTE.test(pathname)
   const isAgentsIndex = AGENTS_INDEX_ROUTE.test(pathname)
   const isPlotsIndex = PLOTS_INDEX_ROUTE.test(pathname)
@@ -79,65 +73,82 @@ export default function App() {
     !isAdvancedBookingDetail
 
   function handleSignOut() {
+    clearSession()
     navigate('/', { replace: true })
-    setHasEntered(false)
   }
 
-  function handleEnter() {
+  function handleEnterUser() {
+    enterAsUser()
     navigate('/', { replace: true })
-    setHasEntered(true)
+  }
+
+  function handleEnterAgency() {
+    enterAsAgency()
+    navigate('/agency', { replace: true })
+  }
+
+  if (isAgency) {
+    return (
+      <>
+        <RoleGate
+          open={!hasEntered}
+          onEnterUser={handleEnterUser}
+          onEnterAgency={handleEnterAgency}
+        />
+        <div className="min-h-screen bg-offwhite">
+          <ScrollToTop />
+          <Routes>
+            <Route path="/agency" element={<AgencyShell onSignOut={handleSignOut} />}>
+              <Route index element={<AgencyDashboard />} />
+              <Route path="profile" element={<AgencyProfileEdit />} />
+              <Route path="listings" element={<AgencyListings />} />
+              <Route path="listings/new" element={<AgencyListingForm />} />
+              <Route path="listings/:id/edit" element={<AgencyListingForm />} />
+              <Route path="recommendations" element={<AgencyRecommendations />} />
+              <Route path="recommendations/new" element={<CreateRecommendation />} />
+              <Route path="recommendations/:id/edit" element={<CreateRecommendation />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/agency" replace />} />
+          </Routes>
+        </div>
+      </>
+    )
   }
 
   return (
     <>
-      <RoleGate open={!hasEntered} onEnter={handleEnter} />
+      <RoleGate
+        open={!hasEntered}
+        onEnterUser={handleEnterUser}
+        onEnterAgency={handleEnterAgency}
+      />
 
-      {/* While the gate is open the shell stays inert — visible behind it, but
-          not clickable, focusable or exposed to assistive technology. */}
-      <div inert={!hasEntered} className="flex min-h-screen flex-col bg-offwhite">
+      <div inert={!hasEntered ? true : undefined} className="flex min-h-screen flex-col bg-offwhite">
         <ScrollToTop />
         {showNavbar && <Navbar onSignOut={handleSignOut} />}
 
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
-
             <Route path="/about" element={<About />} />
-
             <Route path="/contact" element={<ContactUs />} />
-
             <Route path="/favourites" element={<Favourites />} />
-
             <Route path="/profile" element={<Profile />} />
-
             <Route path="/properties" element={<Properties />} />
-
             <Route path="/properties/:id" element={<PropertyDetail />} />
-
             <Route path="/plots" element={<Plots />} />
-
             <Route path="/plots/:id" element={<PlotDetail />} />
-
             <Route path="/agents" element={<Agents />} />
-
             <Route path="/agents/:id" element={<AgentProfile />} />
-
             <Route path="/advanced-booking" element={<AdvanceBooking />} />
-
             <Route path="/advanced-booking/:id" element={<AdvanceBookingDetail />} />
-
             <Route path="/agents-recommend" element={<AgentRecommendations />} />
-
             <Route path="/agents-recommend/:id" element={<RecommendationDetail />} />
-
             <Route path="/my-recommendations" element={<MyRecommendations />} />
-
             <Route path="/my-recommendations/new" element={<CreateRecommendation />} />
-
             <Route path="/my-recommendations/:id/edit" element={<CreateRecommendation />} />
-
             <Route path="/admin/recommendations" element={<AdminRecommendations />} />
-
+            <Route path="/agency/*" element={<Navigate to="/" replace />} />
             <Route
               path="*"
               element={

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { BadgeCheck, MapPin, Star } from 'lucide-react'
 import SectionHeading from './ui/SectionHeading'
 import FavoriteButton from './FavoriteButton'
-import { featuredAgents } from '../data/agents'
+import { getMergedAgents, useAgencyStore } from '../utils/agencyStore'
 import { FAVORITE_KINDS } from '../utils/favorites'
 
 /**
@@ -73,6 +73,9 @@ function AgentCard({ agent }) {
 }
 
 export default function FeaturedAgents() {
+  useAgencyStore()
+  const agents = getMergedAgents().slice(0, 8)
+
   return (
     <section id="featured-agents" className="bg-offwhite py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
@@ -90,7 +93,7 @@ export default function FeaturedAgents() {
         />
 
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {featuredAgents.slice(0, 8).map((agent) => (
+          {agents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} />
           ))}
         </div>

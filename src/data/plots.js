@@ -353,7 +353,37 @@ export const featuredPlots = [
  * render its own not-found state.
  */
 export function getPlotById(id) {
-  return featuredPlots.find((plot) => plot.id === id)
+  const base = featuredPlots.find((plot) => plot.id === id)
+  if (typeof window === 'undefined') return base
+  try {
+    const all = JSON.parse(localStorage.getItem('makan-agency-listings-v1') || '{}')
+    for (const list of Object.values(all)) {
+      const match = (list || []).find((item) => item.id === id && item.kind === 'plot')
+      if (match) {
+        if (match.disabled) return undefined
+        return {
+          id: match.id,
+          title: match.title,
+          location: match.location,
+          city: match.city,
+          size: match.area || match.size,
+          plotType: match.plotType || 'Residential',
+          price: match.price,
+          pricePerUnit: match.pricePerUnit || '',
+          image: match.image,
+          tags: match.tags || [],
+          agentId: match.agentId,
+          description: match.description,
+          highlights: match.highlights || [],
+          listedOn: match.listedAt,
+          updatedOn: match.updatedAt || match.listedAt,
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return base
 }
 
 /**
