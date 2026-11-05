@@ -124,6 +124,14 @@ export default function RecommendationDetail() {
                 <h1 className="mt-4 font-display text-3xl font-extrabold text-balance text-slate-900 sm:text-4xl">
                   {rec.title}
                 </h1>
+                {rec.projectName && (
+                  <p className="mt-2 text-sm font-semibold text-slate-500">{rec.projectName}</p>
+                )}
+                {(rec.location || rec.city) && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    {[rec.location, rec.city].filter(Boolean).join(', ')}
+                  </p>
+                )}
                 {rec.publishedAt && (
                   <p className="mt-2 text-xs font-semibold text-slate-400">
                     Published {formatMonthYear(rec.publishedAt)}
@@ -133,29 +141,46 @@ export default function RecommendationDetail() {
 
               <article className={PANEL}>
                 <div className="space-y-8">
-                  <section>
-                    <h2 className="font-display text-lg font-bold text-slate-900">
-                      Why the agent recommends it
-                    </h2>
-                    <span className="mt-3 block h-1 w-14 rounded-full bg-brand" aria-hidden="true" />
-                    <p className="mt-5 text-sm leading-relaxed text-slate-600">{rec.whyRecommend}</p>
-                  </section>
+                  {Array.isArray(rec.content) && rec.content.length > 0
+                    ? rec.content.map((block, index) => (
+                        <section
+                          key={`${block.heading}-${index}`}
+                          className={index > 0 ? 'border-t border-slate-100 pt-8' : ''}
+                        >
+                          <h2 className="font-display text-lg font-bold text-slate-900">
+                            {block.heading}
+                          </h2>
+                          <span className="mt-3 block h-1 w-14 rounded-full bg-brand" aria-hidden="true" />
+                          <p className="mt-5 text-sm leading-relaxed text-slate-600">{block.value}</p>
+                        </section>
+                      ))
+                    : (
+                      <>
+                        <section>
+                          <h2 className="font-display text-lg font-bold text-slate-900">
+                            Why the agent recommends it
+                          </h2>
+                          <span className="mt-3 block h-1 w-14 rounded-full bg-brand" aria-hidden="true" />
+                          <p className="mt-5 text-sm leading-relaxed text-slate-600">{rec.whyRecommend}</p>
+                        </section>
 
-                  <section className="border-t border-slate-100 pt-8">
-                    <h2 className="font-display text-lg font-bold text-slate-900">
-                      Market perspective & demand
-                    </h2>
-                    <span className="mt-3 block h-1 w-14 rounded-full bg-brand" aria-hidden="true" />
-                    <p className="mt-5 text-sm leading-relaxed text-slate-600">{rec.marketInsights}</p>
-                  </section>
+                        <section className="border-t border-slate-100 pt-8">
+                          <h2 className="font-display text-lg font-bold text-slate-900">
+                            Market perspective & demand
+                          </h2>
+                          <span className="mt-3 block h-1 w-14 rounded-full bg-brand" aria-hidden="true" />
+                          <p className="mt-5 text-sm leading-relaxed text-slate-600">{rec.marketInsights}</p>
+                        </section>
 
-                  <section className="border-t border-slate-100 pt-8">
-                    <h2 className="font-display text-lg font-bold text-slate-900">
-                      Future development prospects
-                    </h2>
-                    <span className="mt-3 block h-1 w-14 rounded-full bg-brand" aria-hidden="true" />
-                    <p className="mt-5 text-sm leading-relaxed text-slate-600">{rec.futureProspects}</p>
-                  </section>
+                        <section className="border-t border-slate-100 pt-8">
+                          <h2 className="font-display text-lg font-bold text-slate-900">
+                            Future development prospects
+                          </h2>
+                          <span className="mt-3 block h-1 w-14 rounded-full bg-brand" aria-hidden="true" />
+                          <p className="mt-5 text-sm leading-relaxed text-slate-600">{rec.futureProspects}</p>
+                        </section>
+                      </>
+                    )}
                 </div>
               </article>
 
