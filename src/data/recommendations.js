@@ -19,7 +19,7 @@ export const DEMAND_LEVELS = ['High', 'Medium', 'Emerging']
 
 export const PROJECT_TYPES = ['Residential', 'Commercial', 'Mixed Use', 'Plots', 'Apartments']
 
-const STORAGE_KEY = 'makaan-recommendations-v1'
+const STORAGE_KEY = 'makaan-recommendations-v2'
 
 function agentBrief(id) {
   const agent = featuredAgents.find((item) => item.id === id)
@@ -369,22 +369,36 @@ const SEED = [
   /* Agency / admin moderation samples */
   {
     id: 'rec-101',
-    title: 'Draft: Rawalpindi Askari Apartment Yield Notes',
+    title: 'Draft: Clifton Sea-View Rental Notes',
     category: 'Market Insights',
-    city: 'Rawalpindi',
-    location: 'Askari Towers',
+    city: 'Karachi',
+    location: 'Clifton Block 4',
+    projectName: 'Clifton High-Rise Desk',
     projectType: 'Apartments',
     projectStatus: 'Ready',
     demandLevel: 'Medium',
     expectedLaunch: '',
     priceMin: 80_000,
     priceMax: 180_000,
+    image:
+      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80',
     coverImage:
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80',
     ],
-    description: 'Working draft on rental yields for furnished Askari apartments.',
+    content: [
+      {
+        heading: 'Why we are watching this pocket',
+        value:
+          'Stable tenant demand from officers and corporate staff keeps furnished sea-view floors liquid for rent.',
+      },
+      {
+        heading: 'Current market read',
+        value: '3-bed furnished units lease faster than unfurnished shells in the same towers.',
+      },
+    ],
+    description: 'Working draft on rental yields for furnished Clifton apartments.',
     whyRecommend: 'Stable tenant demand from officers and corporate staff.',
     marketInsights: '3-bed furnished units lease faster than unfurnished.',
     futureProspects: 'Yields may compress if new supply arrives nearby.',
@@ -392,7 +406,7 @@ const SEED = [
     agentOpinionNote: 'Draft — not published.',
     relatedProjectId: '',
     relatedPropertyIds: ['prop-005'],
-    agentId: 'ag-004',
+    agentId: 'ag-001',
     status: 'draft',
     publishedAt: '',
     createdAt: '2026-10-25',
