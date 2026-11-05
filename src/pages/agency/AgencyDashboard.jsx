@@ -1,9 +1,8 @@
-import { Link, useOutletContext } from 'react-router-dom'
-import { Home, PlusCircle, Sparkles } from 'lucide-react'
+import { useOutletContext } from 'react-router-dom'
+import { Home, Sparkles } from 'lucide-react'
 
 import { getAgencyListings, useAgencyStore } from '../../utils/agencyStore'
 import { getRecommendationsByAgent } from '../../data/recommendations'
-import { formatPKR } from '../../utils/format'
 
 export default function AgencyDashboard() {
   useAgencyStore()
@@ -42,53 +41,6 @@ export default function AgencyDashboard() {
           </div>
         ))}
       </div>
-
-      <div className="flex flex-wrap gap-3">
-        <Link
-          to="/agency/listings/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:bg-brand-dark"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Add listing
-        </Link>
-        <Link
-          to="/agency/profile"
-          className="inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-white px-5 py-3 text-sm font-bold text-brand transition hover:bg-brand-soft"
-        >
-          Edit agency profile
-        </Link>
-        <Link
-          to="/agency/recommendations"
-          className="inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-white px-5 py-3 text-sm font-bold text-brand transition hover:bg-brand-soft"
-        >
-          Recommendations
-        </Link>
-      </div>
-
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-        <h2 className="font-display text-lg font-bold text-slate-900">Recent listings</h2>
-        <div className="mt-4 divide-y divide-slate-100">
-          {listings.slice(0, 5).map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-3 py-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-slate-800">{item.title}</p>
-                <p className="text-xs text-slate-500">
-                  {item.propertyType} · {item.city} · {formatPKR(item.price)}
-                </p>
-              </div>
-              <Link
-                to={`/agency/listings/${item.id}/edit`}
-                className="shrink-0 text-xs font-bold text-brand hover:underline"
-              >
-                Edit
-              </Link>
-            </div>
-          ))}
-          {listings.length === 0 && (
-            <p className="py-6 text-center text-sm text-slate-500">No listings yet. Add your first one.</p>
-          )}
-        </div>
-      </section>
     </div>
   )
 }
