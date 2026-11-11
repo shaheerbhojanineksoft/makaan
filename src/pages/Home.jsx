@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import HeroSearch from '../components/HeroSearch'
 import HomeSearchResults from '../components/HomeSearchResults'
+import TrustedLawyersBanner from '../components/TrustedLawyersBanner'
 import FeaturedAgents from '../components/FeaturedAgents'
 import FeaturedPlots from '../components/FeaturedPlots'
 import FreshProperties from '../components/FreshProperties'
@@ -10,10 +11,11 @@ import FreshProperties from '../components/FreshProperties'
  * Home screen — the sequential scroll flow:
  *
  *   Navbar (App shell)
- *    1. HeroSearch        — landmark hero + multi-tab glass search
- *    2. FreshProperties   — newest listings, light green tint
- *    3. FeaturedPlots     — exclusive plots, clean white surface
- *    4. FeaturedAgents    — top 8 experts, off-white surface
+ *    1. HeroSearch            — landmark hero + multi-tab glass search
+ *    2. TrustedLawyersBanner  — compact fraud-safety / lawyer CTA
+ *    3. FreshProperties       — newest listings, light green tint
+ *    4. FeaturedPlots         — exclusive plots, clean white surface
+ *    5. FeaturedAgents        — top 8 experts, off-white surface
  *   Footer (App shell)
  *
  * Each block is an independent component, so any section can be reordered,
@@ -51,6 +53,7 @@ export default function Home() {
         <HomeSearchResults filters={searchFilters} onClear={clearSearch} />
       ) : (
         <>
+          <TrustedLawyersBanner />
           <FreshProperties />
           <FeaturedPlots />
           <FeaturedAgents />
