@@ -6,6 +6,7 @@ import UserAvatarMenu from './UserAvatarMenu'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/' },
+  { label: 'Reels', to: '/reels' },
   {
     label: 'What Our Agents Recommend',
     to: '/agents-recommend',

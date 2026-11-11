@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Eye,
   MapPin,
   Maximize,
   Pencil,
@@ -377,8 +378,7 @@ export default function AgencyListings() {
                 return (
                   <tr
                     key={item.id}
-                    onClick={() => setSelected(item)}
-                    className={`cursor-pointer hover:bg-slate-50/80 ${isDisabled ? 'bg-slate-50/60 opacity-80' : ''}`}
+                    className={`hover:bg-slate-50/80 ${isDisabled ? 'bg-slate-50/60 opacity-80' : ''}`}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -408,8 +408,16 @@ export default function AgencyListings() {
                         {isDisabled ? 'Disabled' : 'Active'}
                       </span>
                     </td>
-                    <td className="px-4 py-3" onClick={(event) => event.stopPropagation()}>
+                    <td className="px-4 py-3">
                       <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelected(item)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-brand hover:bg-brand-soft"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          View
+                        </button>
                         <Link
                           to={`/agency/listings/${item.id}/edit`}
                           className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-brand hover:bg-brand-soft"

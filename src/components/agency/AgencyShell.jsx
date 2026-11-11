@@ -1,6 +1,8 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   Building2,
+  Clapperboard,
+  Headphones,
   Home,
   LayoutDashboard,
   LogOut,
@@ -16,6 +18,8 @@ const NAV = [
   { to: '/agency/profile', label: 'Agency Profile', icon: Building2 },
   { to: '/agency/listings', label: 'My Listings', icon: Home },
   { to: '/agency/recommendations', label: 'Recommendations', icon: Sparkles },
+  { to: '/agency/reels', label: 'Reels', icon: Clapperboard },
+  { to: '/agency/help-support', label: 'Help & support', icon: Headphones },
 ]
 
 function linkClass({ isActive }) {

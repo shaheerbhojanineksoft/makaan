@@ -18,6 +18,7 @@ import Properties from './pages/Properties'
 import Plots from './pages/Plots'
 import AdvanceBooking from './pages/AdvanceBooking'
 import AdvanceBookingDetail from './pages/AdvanceBookingDetail'
+import Reels from './pages/Reels'
 import AgentRecommendations from './pages/AgentRecommendations'
 import RecommendationDetail from './pages/RecommendationDetail'
 import MyRecommendations from './pages/MyRecommendations'
@@ -31,6 +32,9 @@ import AgencyProfileEdit from './pages/agency/AgencyProfileEdit'
 import AgencyListings from './pages/agency/AgencyListings'
 import AgencyListingForm from './pages/agency/AgencyListingForm'
 import AgencyRecommendations from './pages/agency/AgencyRecommendations'
+import AgencyHelpSupport from './pages/agency/AgencyHelpSupport'
+import AgencyReels from './pages/agency/AgencyReels'
+import AgencyReelForm from './pages/agency/AgencyReelForm'
 import {
   clearSession,
   enterAsAgency,
@@ -44,9 +48,6 @@ const PLOTS_INDEX_ROUTE = /^\/plots\/?$/
 const PROPERTIES_INDEX_ROUTE = /^\/properties\/?$/
 const PLOT_DETAIL_ROUTE = /^\/plots\/[^/]+\/?$/
 const PROPERTY_DETAIL_ROUTE = /^\/properties\/[^/]+\/?$/
-const ADVANCED_BOOKING_ROUTE = /^\/advanced-booking\/?$/
-const ADVANCED_BOOKING_DETAIL_ROUTE = /^\/advanced-booking\/[^/]+\/?$/
-
 export default function App() {
   const session = useSession()
   const hasEntered = Boolean(session.role)
@@ -60,17 +61,16 @@ export default function App() {
   const isPropertiesIndex = PROPERTIES_INDEX_ROUTE.test(pathname)
   const isPlotDetail = PLOT_DETAIL_ROUTE.test(pathname)
   const isPropertyDetail = PROPERTY_DETAIL_ROUTE.test(pathname)
-  const isAdvancedBooking = ADVANCED_BOOKING_ROUTE.test(pathname)
-  const isAdvancedBookingDetail = ADVANCED_BOOKING_DETAIL_ROUTE.test(pathname)
+  const isReels = pathname === '/reels' || pathname.startsWith('/reels/')
   const showNavbar =
+    !isReels &&
     !isAgentProfile &&
     !isAgentsIndex &&
     !isPlotsIndex &&
     !isPropertiesIndex &&
     !isPropertyDetail &&
-    !isPlotDetail &&
-    !isAdvancedBooking &&
-    !isAdvancedBookingDetail
+    !isPlotDetail
+  const showChrome = !isReels
 
   function handleSignOut() {
     clearSession()
@@ -107,6 +107,9 @@ export default function App() {
               <Route path="recommendations" element={<AgencyRecommendations />} />
               <Route path="recommendations/new" element={<CreateRecommendation />} />
               <Route path="recommendations/:id/edit" element={<CreateRecommendation />} />
+              <Route path="reels" element={<AgencyReels />} />
+              <Route path="reels/new" element={<AgencyReelForm />} />
+              <Route path="help-support" element={<AgencyHelpSupport />} />
             </Route>
             <Route path="*" element={<Navigate to="/agency" replace />} />
           </Routes>
@@ -142,6 +145,7 @@ export default function App() {
             <Route path="/agents/:id" element={<AgentProfile />} />
             <Route path="/advanced-booking" element={<AdvanceBooking />} />
             <Route path="/advanced-booking/:id" element={<AdvanceBookingDetail />} />
+            <Route path="/reels" element={<Reels />} />
             <Route path="/agents-recommend" element={<AgentRecommendations />} />
             <Route path="/agents-recommend/:id" element={<RecommendationDetail />} />
             <Route path="/my-recommendations" element={<MyRecommendations />} />
@@ -163,8 +167,8 @@ export default function App() {
           </Routes>
         </main>
 
-        <GetTheApp />
-        <Footer />
+        {showChrome && <GetTheApp />}
+        {showChrome && <Footer />}
       </div>
     </>
   )
