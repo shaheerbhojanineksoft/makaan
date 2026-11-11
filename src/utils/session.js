@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
+import { clearBuyerGuidePending, markBuyerGuidePending } from './buyerGuidePopup'
+
 const STORAGE_KEY = 'makan-session-v1'
 const listeners = new Set()
 
@@ -44,14 +46,17 @@ export function getSession() {
 }
 
 export function enterAsUser() {
+  markBuyerGuidePending()
   write({ role: 'user', agencyId: null })
 }
 
 export function enterAsAgency(agencyId = DEMO_AGENCY_ID) {
+  clearBuyerGuidePending()
   write({ role: 'agency', agencyId })
 }
 
 export function clearSession() {
+  clearBuyerGuidePending()
   write({ ...DEFAULT })
 }
 

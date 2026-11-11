@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { SearchX } from 'lucide-react'
 
@@ -5,6 +6,7 @@ import Navbar from './components/Navbar'
 import GetTheApp from './components/GetTheApp'
 import Footer from './components/Footer'
 import RoleGate from './components/RoleGate'
+import BuyerGuidePopup from './components/BuyerGuidePopup'
 import ScrollToTop from './components/ScrollToTop'
 import AgencyShell from './components/agency/AgencyShell'
 import Home from './pages/Home'
@@ -26,6 +28,7 @@ import CreateRecommendation from './pages/CreateRecommendation'
 import AdminRecommendations from './pages/AdminRecommendations'
 import Favourites from './pages/Favourites'
 import Profile from './pages/Profile'
+import BeforeYouBuy from './pages/BeforeYouBuy'
 import ComingSoon from './pages/ComingSoon'
 import AgencyDashboard from './pages/agency/AgencyDashboard'
 import AgencyProfileEdit from './pages/agency/AgencyProfileEdit'
@@ -41,6 +44,13 @@ import {
   enterAsUser,
   useSession,
 } from './utils/session'
+import {
+  clearBuyerGuidePending,
+  consumeBuyerGuideSkipOnce,
+  isBuyerGuidePending,
+  markBuyerGuideSkipOnce,
+  syncBuyerGuideOnPageLoad,
+} from './utils/buyerGuidePopup'
 
 const AGENT_PROFILE_ROUTE = /^\/agents\/[^/]+\/?$/
 const AGENTS_INDEX_ROUTE = /^\/agents\/?$/
@@ -52,8 +62,67 @@ export default function App() {
   const session = useSession()
   const hasEntered = Boolean(session.role)
   const isAgency = session.role === 'agency'
+  const isUser = session.role === 'user'
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const [buyerGuideOpen, setBuyerGuideOpen] = useState(false)
+  const loadSyncedRef = useRef(false)
+
+  useEffect(() => {
+    function onPopState() {
+      // Soft/hard browser back should not reopen guidance on dashboard.
+      markBuyerGuideSkipOnce()
+      setBuyerGuideOpen(false)
+    }
+    function onPageShow(event) {
+      // Back-forward cache restore should not force the splash again.
+      if (event.persisted) {
+        markBuyerGuideSkipOnce()
+        setBuyerGuideOpen(false)
+      }
+    }
+    window.addEventListener('popstate', onPopState)
+    window.addEventListener('pageshow', onPageShow)
+    return () => {
+      window.removeEventListener('popstate', onPopState)
+      window.removeEventListener('pageshow', onPageShow)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (loadSyncedRef.current) return
+    loadSyncedRef.current = true
+    syncBuyerGuideOnPageLoad(isUser, pathname)
+
+    // Hard refresh on dashboard must open guidance even if RR reports POP.
+    if (
+      isUser &&
+      hasEntered &&
+      (pathname === '/' || pathname === '') &&
+      !consumeBuyerGuideSkipOnce() &&
+      isBuyerGuidePending()
+    ) {
+      setBuyerGuideOpen(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!isUser || !hasEntered || pathname !== '/') {
+      setBuyerGuideOpen(false)
+      return
+    }
+    if (consumeBuyerGuideSkipOnce()) {
+      setBuyerGuideOpen(false)
+      return
+    }
+    if (isBuyerGuidePending()) setBuyerGuideOpen(true)
+  }, [isUser, hasEntered, pathname])
+
+  const handleCloseBuyerGuide = useCallback(() => {
+    clearBuyerGuidePending()
+    setBuyerGuideOpen(false)
+  }, [])
 
   const isAgentProfile = AGENT_PROFILE_ROUTE.test(pathname)
   const isAgentsIndex = AGENTS_INDEX_ROUTE.test(pathname)
@@ -126,6 +195,8 @@ export default function App() {
         onEnterAgency={handleEnterAgency}
       />
 
+      <BuyerGuidePopup open={buyerGuideOpen} onClose={handleCloseBuyerGuide} />
+
       <div inert={!hasEntered ? true : undefined} className="flex min-h-screen flex-col bg-offwhite">
         <ScrollToTop />
         {showNavbar && <Navbar onSignOut={handleSignOut} />}
@@ -136,6 +207,7 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/favourites" element={<Favourites />} />
+            <Route path="/before-you-buy" element={<BeforeYouBuy />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/properties/:id" element={<PropertyDetail />} />

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { ChevronDown, Heart, LogOut, UserRound } from 'lucide-react'
+import { ChevronDown, Heart, LogOut, ShieldCheck, UserRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCurrentUser } from '../utils/currentUser'
 
@@ -84,6 +84,15 @@ export default function UserAvatarMenu({ compact = false, onSignOut }) {
             >
               <Heart className="h-4 w-4" aria-hidden="true" />
               Favourites
+            </Link>
+            <Link
+              role="menuitem"
+              to="/before-you-buy"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-brand-soft hover:text-brand"
+            >
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+              Before You Buy / Rent
             </Link>
             <Link
               role="menuitem"
