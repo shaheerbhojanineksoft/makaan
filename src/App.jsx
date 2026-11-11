@@ -29,6 +29,7 @@ import AdminRecommendations from './pages/AdminRecommendations'
 import Favourites from './pages/Favourites'
 import Profile from './pages/Profile'
 import BeforeYouBuy from './pages/BeforeYouBuy'
+import TrustedLawyers from './pages/TrustedLawyers'
 import ComingSoon from './pages/ComingSoon'
 import AgencyDashboard from './pages/agency/AgencyDashboard'
 import AgencyProfileEdit from './pages/agency/AgencyProfileEdit'
@@ -208,6 +209,7 @@ export default function App() {
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/favourites" element={<Favourites />} />
             <Route path="/before-you-buy" element={<BeforeYouBuy />} />
+            <Route path="/trusted-lawyers" element={<TrustedLawyers />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/properties/:id" element={<PropertyDetail />} />

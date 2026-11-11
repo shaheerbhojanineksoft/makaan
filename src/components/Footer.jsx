@@ -1,4 +1,5 @@
-import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Youtube } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Scale, Youtube } from 'lucide-react'
 import Logo from './ui/Logo'
 import { SITE } from '../data/siteConfig'
 
@@ -74,6 +75,11 @@ export default function Footer() {
             </ContactRow>
             <ContactRow icon={MapPin}>
               <span>Head Office: Shahrah-e-Faisal, Karachi, Pakistan</span>
+            </ContactRow>
+            <ContactRow icon={Scale}>
+              <Link to="/trusted-lawyers" className="transition hover:text-white">
+                Talk to our trusted lawyers
+              </Link>
             </ContactRow>
           </ul>
 
