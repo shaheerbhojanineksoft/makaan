@@ -4,6 +4,7 @@ import {
   Clapperboard,
   Headphones,
   Home,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Sparkles,
@@ -19,6 +20,7 @@ const NAV = [
   { to: '/agency/listings', label: 'My Listings', icon: Home },
   { to: '/agency/recommendations', label: 'Recommendations', icon: Sparkles },
   { to: '/agency/reels', label: 'Reels', icon: Clapperboard },
+  { to: '/agency/client-queries', label: 'Client queries', icon: Inbox },
   { to: '/agency/help-support', label: 'Help & support', icon: Headphones },
 ]
 

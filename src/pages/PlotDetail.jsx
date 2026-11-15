@@ -34,6 +34,7 @@ import SectionHeading from '../components/ui/SectionHeading'
 import { getOtherPlots, getPlotById } from '../data/plots'
 import { getAgentById } from '../data/agents'
 import { FAVORITE_KINDS } from '../utils/favorites'
+import { createClientQuery } from '../utils/clientQueriesStore'
 import { formatMonthYear, formatPKR } from '../utils/format'
 
 /**
@@ -290,11 +291,14 @@ function EnquiryForm({ plot, agent }) {
   function handleSubmit(event) {
     event.preventDefault()
     const payload = Object.fromEntries(new FormData(event.currentTarget))
-
-    /* TODO: POST /api/plots/:id/enquiries */
-    // eslint-disable-next-line no-console
-    console.info('[PlotDetail] query submitted:', payload)
-
+    createClientQuery({
+      agencyId: agent?.id || plot.agentId,
+      listingId: plot.id,
+      name: payload.name,
+      phone: payload.phone,
+      email: payload.email,
+      message: payload.message,
+    })
     event.currentTarget.reset()
     setSent(true)
   }

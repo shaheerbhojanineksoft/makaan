@@ -27,6 +27,7 @@ import FavoriteButton from '../components/FavoriteButton'
 import SectionHeading from '../components/ui/SectionHeading'
 import { formatMonthYear, formatPKR } from '../utils/format'
 import { FAVORITE_KINDS } from '../utils/favorites'
+import { createClientQuery } from '../utils/clientQueriesStore'
 import { getOtherProperties, getPropertyById } from '../data/properties'
 import { getAgentById } from '../data/agents'
 
@@ -113,6 +114,15 @@ function EnquiryForm({ property }) {
 
   function handleSubmit(event) {
     event.preventDefault()
+    const data = Object.fromEntries(new FormData(event.currentTarget))
+    createClientQuery({
+      agencyId: property.agentId || property.agent?.id,
+      listingId: property.id,
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      message: data.message,
+    })
     event.currentTarget.reset()
     setSent(true)
   }

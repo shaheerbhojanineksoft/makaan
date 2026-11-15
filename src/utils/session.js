@@ -8,7 +8,10 @@ const listeners = new Set()
 /** Demo agency account — Ahmed Raza / Raza Estates */
 export const DEMO_AGENCY_ID = 'ag-001'
 
-const DEFAULT = { role: null, agencyId: null }
+/** Demo lawyer account after Google sign-in */
+export const DEMO_LAWYER_ID = 'law-google-001'
+
+const DEFAULT = { role: null, agencyId: null, lawyerId: null }
 
 function read() {
   try {
@@ -47,12 +50,17 @@ export function getSession() {
 
 export function enterAsUser() {
   markBuyerGuidePending()
-  write({ role: 'user', agencyId: null })
+  write({ role: 'user', agencyId: null, lawyerId: null })
 }
 
 export function enterAsAgency(agencyId = DEMO_AGENCY_ID) {
   clearBuyerGuidePending()
-  write({ role: 'agency', agencyId })
+  write({ role: 'agency', agencyId, lawyerId: null })
+}
+
+export function enterAsLawyer(lawyerId = DEMO_LAWYER_ID) {
+  clearBuyerGuidePending()
+  write({ role: 'lawyer', agencyId: null, lawyerId })
 }
 
 export function clearSession() {

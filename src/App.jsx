@@ -37,11 +37,14 @@ import AgencyListings from './pages/agency/AgencyListings'
 import AgencyListingForm from './pages/agency/AgencyListingForm'
 import AgencyRecommendations from './pages/agency/AgencyRecommendations'
 import AgencyHelpSupport from './pages/agency/AgencyHelpSupport'
+import AgencyClientQueries from './pages/agency/AgencyClientQueries'
 import AgencyReels from './pages/agency/AgencyReels'
 import AgencyReelForm from './pages/agency/AgencyReelForm'
+import LawyerProfile from './pages/lawyer/LawyerProfile'
 import {
   clearSession,
   enterAsAgency,
+  enterAsLawyer,
   enterAsUser,
   useSession,
 } from './utils/session'
@@ -63,6 +66,7 @@ export default function App() {
   const session = useSession()
   const hasEntered = Boolean(session.role)
   const isAgency = session.role === 'agency'
+  const isLawyer = session.role === 'lawyer'
   const isUser = session.role === 'user'
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -157,6 +161,31 @@ export default function App() {
     navigate('/agency', { replace: true })
   }
 
+  function handleEnterLawyer() {
+    enterAsLawyer()
+    navigate('/lawyer', { replace: true })
+  }
+
+  if (isLawyer) {
+    return (
+      <>
+        <RoleGate
+          open={!hasEntered}
+          onEnterUser={handleEnterUser}
+          onEnterAgency={handleEnterAgency}
+          onEnterLawyer={handleEnterLawyer}
+        />
+        <div className="min-h-screen bg-offwhite">
+          <ScrollToTop />
+          <Routes>
+            <Route path="/lawyer" element={<LawyerProfile onSignOut={handleSignOut} />} />
+            <Route path="*" element={<Navigate to="/lawyer" replace />} />
+          </Routes>
+        </div>
+      </>
+    )
+  }
+
   if (isAgency) {
     return (
       <>
@@ -164,6 +193,7 @@ export default function App() {
           open={!hasEntered}
           onEnterUser={handleEnterUser}
           onEnterAgency={handleEnterAgency}
+          onEnterLawyer={handleEnterLawyer}
         />
         <div className="min-h-screen bg-offwhite">
           <ScrollToTop />
@@ -179,6 +209,7 @@ export default function App() {
               <Route path="recommendations/:id/edit" element={<CreateRecommendation />} />
               <Route path="reels" element={<AgencyReels />} />
               <Route path="reels/new" element={<AgencyReelForm />} />
+              <Route path="client-queries" element={<AgencyClientQueries />} />
               <Route path="help-support" element={<AgencyHelpSupport />} />
             </Route>
             <Route path="*" element={<Navigate to="/agency" replace />} />
@@ -194,6 +225,7 @@ export default function App() {
         open={!hasEntered}
         onEnterUser={handleEnterUser}
         onEnterAgency={handleEnterAgency}
+        onEnterLawyer={handleEnterLawyer}
       />
 
       <BuyerGuidePopup open={buyerGuideOpen} onClose={handleCloseBuyerGuide} />

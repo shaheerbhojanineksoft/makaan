@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, Building2, UserRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Building2, Scale, UserRound } from 'lucide-react'
 
 import Logo from './ui/Logo'
 
@@ -27,16 +27,16 @@ function GoogleIcon({ className = 'h-5 w-5' }) {
 }
 
 /**
- * Full-screen entry gate — pick User or Agency, then Google sign-in for that path only.
- * User and agency accounts stay separate.
+ * Full-screen entry gate — pick User, Agency, or Lawyer, then Google sign-in.
  *
  * @param {boolean} open
  * @param {() => void} onEnterUser
  * @param {() => void} onEnterAgency
+ * @param {() => void} onEnterLawyer
  */
-export default function RoleGate({ open, onEnterUser, onEnterAgency }) {
+export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawyer }) {
   const enterRef = useRef(null)
-  /** @type {null | 'user' | 'agency'} */
+  /** @type {null | 'user' | 'agency' | 'lawyer'} */
   const [path, setPath] = useState(null)
   const [signingIn, setSigningIn] = useState(false)
 
@@ -66,7 +66,8 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency }) {
     window.setTimeout(() => {
       setSigningIn(false)
       if (path === 'user') onEnterUser()
-      else onEnterAgency()
+      else if (path === 'agency') onEnterAgency()
+      else onEnterLawyer?.()
     }, 700)
   }
 
@@ -74,6 +75,23 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency }) {
 
   const isUserPath = path === 'user'
   const isAgencyPath = path === 'agency'
+  const isLawyerPath = path === 'lawyer'
+
+  const title = !path
+    ? 'Choose how you’d like to continue'
+    : isUserPath
+      ? 'Sign in as User'
+      : isAgencyPath
+        ? 'Sign in as Agency'
+        : 'Sign in as Lawyer'
+
+  const subtitle = !path
+    ? 'Welcome to Makaan — User, Agency and Lawyer accounts are separate. Pick a path, then sign in with Google for that account.'
+    : isUserPath
+      ? 'This Google sign-in is for seekers only. It does not create or open an agency account.'
+      : isAgencyPath
+        ? 'This Google sign-in is for agencies only. It does not create or open a user/seeker account.'
+        : 'This Google sign-in is for lawyers only. After login you’ll manage your profile details.'
 
   return (
     <div
@@ -96,18 +114,10 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency }) {
             id="role-gate-title"
             className="mt-4 font-display text-2xl leading-tight font-extrabold text-balance text-white sm:mt-8 sm:text-4xl"
           >
-            {!path
-              ? 'Choose how you’d like to continue'
-              : isUserPath
-                ? 'Sign in as User'
-                : 'Sign in as Agency'}
+            {title}
           </h1>
           <p className="mt-3 max-w-md text-xs leading-relaxed text-brand-soft/80 sm:mt-4 sm:text-base">
-            {!path
-              ? 'Welcome to Makaan — User and Agency accounts are separate. Pick a path, then sign in with Google for that account.'
-              : isUserPath
-                ? 'This Google sign-in is for seekers only. It does not create or open an agency account.'
-                : 'This Google sign-in is for agencies only. It does not create or open a user/seeker account.'}
+            {subtitle}
           </p>
         </div>
 
@@ -162,8 +172,20 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency }) {
               </button>
             </div>
 
-            <p className="mt-4 text-center text-[11px] text-brand-soft/60 sm:mt-8 sm:text-xs">
-              User and agency databases stay separate — each path creates its own Google-linked account.
+            <div className="mt-5 flex justify-center sm:mt-6">
+              <button
+                type="button"
+                onClick={() => setPath('lawyer')}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-[11px] font-bold text-white/90 ring-1 ring-white/25 transition hover:bg-white/15 hover:text-white sm:text-xs"
+              >
+                <Scale className="h-3.5 w-3.5" />
+                Sign in as lawyer
+              </button>
+            </div>
+
+            <p className="mt-4 text-center text-[11px] text-brand-soft/60 sm:mt-6 sm:text-xs">
+              User, agency and lawyer databases stay separate — each path creates its own Google-linked
+              account.
             </p>
           </>
         ) : (
@@ -171,10 +193,16 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency }) {
             <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-[11px] font-bold text-white ring-1 ring-white/20 sm:text-xs">
               {isUserPath ? (
                 <UserRound className="h-3.5 w-3.5" />
-              ) : (
+              ) : isAgencyPath ? (
                 <Building2 className="h-3.5 w-3.5" />
+              ) : (
+                <Scale className="h-3.5 w-3.5" />
               )}
-              {isUserPath ? 'User account path' : 'Agency account path'}
+              {isUserPath
+                ? 'User account path'
+                : isAgencyPath
+                  ? 'Agency account path'
+                  : 'Lawyer account path'}
             </div>
 
             <button
@@ -191,7 +219,9 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency }) {
                 ? 'Signing in…'
                 : isUserPath
                   ? 'Continue with Google as User'
-                  : 'Continue with Google as Agency'}
+                  : isAgencyPath
+                    ? 'Continue with Google as Agency'
+                    : 'Continue with Google as Lawyer'}
             </button>
 
             <button
