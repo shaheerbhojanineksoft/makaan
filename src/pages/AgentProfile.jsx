@@ -208,7 +208,7 @@ function ProfileContent({ agent, backTo }) {
             <div className="pb-1">
               <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 <h1 className="font-display text-2xl font-extrabold text-slate-900 sm:text-3xl">
-                  {agent.name}
+                  {agent.agency}
                 </h1>
                 {agent.verified && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1.5 text-[11px] font-bold text-brand ring-1 ring-brand/15">
@@ -217,7 +217,7 @@ function ProfileContent({ agent, backTo }) {
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-sm font-semibold text-brand">{agent.agency}</p>
+              <p className="mt-1 text-sm font-semibold text-slate-500">{agent.name}</p>
               <p className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs font-medium text-slate-500 sm:justify-start">
                 <span className="inline-flex items-center gap-1.5">
                   <MapPin className="h-3.5 w-3.5 text-brand" aria-hidden="true" />

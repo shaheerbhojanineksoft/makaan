@@ -200,10 +200,10 @@ export default function RecommendationDetail() {
                       />
                       <div>
                         <p className="flex items-center gap-1.5 font-bold text-slate-900">
-                          {agent.name}
+                          {agent.agency}
                           {agent.verified && <BadgeCheck className="h-4 w-4 text-brand" />}
                         </p>
-                        <p className="text-xs font-medium text-slate-500">{agent.agency}</p>
+                        <p className="text-xs font-medium text-slate-500">{agent.name}</p>
                         <p className="mt-1 text-[11px] font-semibold text-slate-400">
                           {agent.city} · {agent.responseTime}
                         </p>

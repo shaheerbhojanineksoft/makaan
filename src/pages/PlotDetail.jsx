@@ -324,8 +324,8 @@ function EnquiryForm({ plot, agent }) {
             className="h-11 w-11 shrink-0 rounded-full bg-white object-cover ring-2 ring-white"
           />
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-900">{agent.name}</p>
-            <p className="truncate text-[11px] font-medium text-slate-500">{agent.agency}</p>
+            <p className="truncate text-sm font-bold text-slate-900">{agent.agency}</p>
+            <p className="truncate text-[11px] font-medium text-slate-500">{agent.name}</p>
           </div>
           <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-brand ring-1 ring-brand/15">
             <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
@@ -457,8 +457,8 @@ function AgencyPanel({ agent }) {
     <section className={PANEL_CLASS}>
       <h2 className="font-display text-base font-bold text-slate-900">Or Contact the Agency</h2>
       <ul className="mt-4 space-y-4">
-        <DetailRow icon={UserRound} label="Listing Agent" value={agent.name} />
         <DetailRow icon={Building2} label="Agency" value={agent.agency} />
+        <DetailRow icon={UserRound} label="Listing Agent" value={agent.name} />
         <DetailRow icon={Clock3} label="Typical Response" value={agent.responseTime} />
         <DetailRow icon={Phone} label="Phone" value={agent.phone} />
         <DetailRow icon={Mail} label="Email" value={agent.email} />

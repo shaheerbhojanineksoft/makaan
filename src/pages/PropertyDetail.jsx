@@ -146,9 +146,9 @@ function EnquiryForm({ property }) {
           className="h-11 w-11 shrink-0 rounded-full bg-white object-cover ring-2 ring-white"
         />
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-slate-900">{property.agent.name}</p>
+          <p className="truncate text-sm font-bold text-slate-900">{property.agent.agency}</p>
           <p className="truncate text-[11px] font-medium text-slate-500">
-            {property.agent.agency}
+            {property.agent.name}
           </p>
         </div>
       </div>
@@ -252,8 +252,8 @@ function AgencyPanel({ agent, property }) {
     <section className={PANEL_CLASS}>
       <h2 className="font-display text-base font-bold text-slate-900">Or Contact the Agency</h2>
       <ul className="mt-4 space-y-4">
-        <DetailRow icon={UserRound} label="Listing Agent" value={agent.name} />
         <DetailRow icon={Building2} label="Agency" value={agent.agency} />
+        <DetailRow icon={UserRound} label="Listing Agent" value={agent.name} />
         <DetailRow icon={Clock3} label="Typical Response" value={agent.responseTime} />
         <DetailRow icon={Phone} label="Phone" value={agent.phone} />
         <DetailRow icon={Mail} label="Email" value={agent.email} />

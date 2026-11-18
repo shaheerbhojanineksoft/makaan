@@ -58,9 +58,9 @@ function AgencyFavoriteCard({ agent }) {
         className="mx-auto h-20 w-20 rounded-full bg-brand-soft object-cover ring-4 ring-brand-soft"
       />
       <h3 className="mt-4 font-display text-base font-bold text-slate-900 transition group-hover:text-brand">
-        {agent.name}
+        {agent.agency}
       </h3>
-      <p className="mt-0.5 text-xs font-medium text-slate-500">{agent.agency}</p>
+      <p className="mt-0.5 text-xs font-medium text-slate-500">{agent.name}</p>
       <p className="mt-1.5 text-[11px] font-medium text-slate-400">{agent.city}</p>
       <span className="mt-4 inline-flex items-center justify-center rounded-xl bg-brand-soft px-4 py-2.5 text-xs font-bold text-brand ring-1 ring-brand/15 transition group-hover:bg-brand group-hover:text-white">
         View Agency

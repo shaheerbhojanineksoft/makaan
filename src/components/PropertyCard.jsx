@@ -78,7 +78,7 @@ export default function PropertyCard({ property }) {
               {isRent && <span className="text-xs font-bold text-slate-400"> /month</span>}
             </p>
             <p className="mt-1 truncate text-[10px] font-medium text-slate-400">
-              {property.agent.name} · {property.agent.agency}
+              {property.agent.agency} · {property.agent.name}
             </p>
           </div>
           <span className="shrink-0 rounded-xl bg-brand-soft px-4 py-2.5 text-xs font-bold text-brand ring-1 ring-brand/15 transition group-hover:bg-brand group-hover:text-white">

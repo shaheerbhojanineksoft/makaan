@@ -60,12 +60,12 @@ export default function RecommendationCard({ recommendation }) {
             />
             <div className="min-w-0">
               <p className="flex items-center gap-1 text-xs font-bold text-slate-800">
-                <span className="truncate">{agent.name}</span>
+                <span className="truncate">{agent.agency}</span>
                 {agent.verified && (
                   <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-brand" aria-hidden="true" />
                 )}
               </p>
-              <p className="truncate text-[11px] font-medium text-slate-500">{agent.agency}</p>
+              <p className="truncate text-[11px] font-medium text-slate-500">{agent.name}</p>
             </div>
           </div>
         )}

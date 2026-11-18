@@ -555,6 +555,198 @@ export const bookingProjects = [
   },
 ]
 
+/** Extra display fields layered onto each booking project for cards + detail. */
+const PROJECT_EXTRAS = {
+  'prj-001': {
+    unitCounts: { flats: 240, villas: 86, shops: 18, offices: 0 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Why Waterfront Enclave is drawing early buyers',
+      publishedAt: '2026-03-12',
+      body: 'Kingdom Valley’s waterfront blocks combine lakeside promenades with a clear 48-month plan. Early booking locks today’s slab rates before the next revision cycle — a pattern we have seen across Islamabad expressway launches.',
+    },
+    timeline: [
+      { label: 'Soft booking opens', date: '2025-06-01', status: 'done' },
+      { label: 'Infrastructure phase', date: '2026-01-01', status: 'done' },
+      { label: 'Tower & villa construction', date: '2026-09-01', status: 'current' },
+      { label: 'Expected completion', date: '2027-12-01', status: 'upcoming' },
+      { label: 'Possession window', date: '2028-03-01', status: 'upcoming' },
+    ],
+  },
+  'prj-002': {
+    unitCounts: { flats: 0, villas: 0, shops: 120, offices: 40, plots: 860 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Overseas Block: what NRPs should verify first',
+      publishedAt: '2026-02-20',
+      body: 'Capital Smart City’s Overseas Block is structured for non-resident buyers. Focus on NOC status, quarterly schedule clarity and motorway access before locking a file.',
+    },
+    timeline: [
+      { label: 'Overseas desk launch', date: '2025-04-01', status: 'done' },
+      { label: 'Plot balloting / allocation', date: '2026-02-01', status: 'current' },
+      { label: 'Utilities rollout', date: '2027-06-01', status: 'upcoming' },
+      { label: 'Expected completion', date: '2028-03-01', status: 'upcoming' },
+    ],
+  },
+  'prj-003': {
+    unitCounts: { flats: 0, villas: 320, shops: 24, offices: 0, plots: 410 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Sector A villas: community amenities before possession',
+      publishedAt: '2026-01-08',
+      body: 'Bahria Town Karachi’s Sector A continues to attract families who want club and park access while construction advances. Transparent development charges remain a key selling point.',
+    },
+    timeline: [
+      { label: 'Sector booking', date: '2024-11-01', status: 'done' },
+      { label: 'Road & utility works', date: '2025-08-01', status: 'done' },
+      { label: 'Villa construction', date: '2026-04-01', status: 'current' },
+      { label: 'Expected completion', date: '2027-06-01', status: 'upcoming' },
+    ],
+  },
+  'prj-004': {
+    unitCounts: { flats: 180, villas: 0, shops: 32, offices: 12, plots: 540 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Hills Estate half-yearly plans explained',
+      publishedAt: '2026-04-02',
+      body: 'Park View City’s Hills Estate uses half-yearly instalments suited to salaried buyers. Corner and park-facing files usually move first at launch pricing.',
+    },
+    timeline: [
+      { label: 'Launch booking', date: '2025-09-01', status: 'done' },
+      { label: 'Site development', date: '2026-05-01', status: 'current' },
+      { label: 'Expected completion', date: '2028-09-01', status: 'upcoming' },
+      { label: 'Possession', date: '2028-12-01', status: 'upcoming' },
+    ],
+  },
+  'prj-005': {
+    unitCounts: { flats: 0, villas: 0, shops: 60, offices: 0, plots: 1200 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Gwadar pre-launch: long horizon, light monthly load',
+      publishedAt: '2026-01-22',
+      body: 'Zamin Model Town targets first-time investors with a 60-month plan. Treat this as a holding play and verify coastal-city infra updates before committing large advances.',
+    },
+    timeline: [
+      { label: 'Pre-launch interest', date: '2025-12-01', status: 'current' },
+      { label: 'Formal booking', date: '2026-08-01', status: 'upcoming' },
+      { label: 'Expected completion', date: '2029-01-01', status: 'upcoming' },
+    ],
+  },
+  'prj-006': {
+    unitCounts: { flats: 0, villas: 450, shops: 16, offices: 0, plots: 200 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Awami Villas waitlist: how priority allocation works',
+      publishedAt: '2026-03-01',
+      body: 'Blue World City’s Awami segment is still in the coming-soon window. Join the waitlist early if you want priority when formal booking opens near Chakri Interchange.',
+    },
+    timeline: [
+      { label: 'Interest registration', date: '2025-10-01', status: 'done' },
+      { label: 'Formal booking window', date: '2026-06-01', status: 'current' },
+      { label: 'Expected completion', date: '2026-12-01', status: 'upcoming' },
+    ],
+  },
+  'prj-007': {
+    unitCounts: { flats: 0, villas: 0, shops: 86, offices: 140, plots: 0 },
+    installmentsAllowed: false,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Gulberg retail podium: full-payment perk',
+      publishedAt: '2026-02-14',
+      body: 'Mall of Lahore prioritises full-payment buyers for earlier handover and fit-out facilitation. Ground-floor shops and upper offices share dedicated parking levels.',
+    },
+    timeline: [
+      { label: 'Foundation complete', date: '2025-07-01', status: 'done' },
+      { label: 'Structure rising', date: '2026-01-01', status: 'current' },
+      { label: 'Expected completion', date: '2027-11-01', status: 'upcoming' },
+    ],
+  },
+  'prj-008': {
+    unitCounts: { flats: 0, villas: 0, shops: 0, offices: 0, plots: 980 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'DHA Multan extension: planning for a 2030 horizon',
+      publishedAt: '2025-12-18',
+      body: 'Phase extension plots suit buyers comfortable with a longer development cycle. Quarterly payments and DHA management remain the core confidence signals.',
+    },
+    timeline: [
+      { label: 'Pre-launch registration', date: '2025-11-01', status: 'current' },
+      { label: 'Development works', date: '2027-01-01', status: 'upcoming' },
+      { label: 'Possession target', date: '2030-12-01', status: 'upcoming' },
+    ],
+  },
+  'prj-009': {
+    unitCounts: { flats: 168, villas: 0, shops: 8, offices: 0, plots: 0 },
+    installmentsAllowed: true,
+    bankTransferAllowed: true,
+    blog: {
+      title: 'Clifton Heights: sea-facing floors still in this tranche',
+      publishedAt: '2026-04-10',
+      body: 'Sea View Builders’ Clifton tower keeps a limited 2–4 bed inventory in the current booking tranche. Covered parking and concierge amenities are included in most plans.',
+    },
+    timeline: [
+      { label: 'Booking tranche live', date: '2025-08-01', status: 'done' },
+      { label: 'Superstructure', date: '2026-03-01', status: 'current' },
+      { label: 'Expected completion', date: '2028-04-01', status: 'upcoming' },
+      { label: 'Possession', date: '2028-07-01', status: 'upcoming' },
+    ],
+  },
+}
+
+function derivePriceRange(project) {
+  const prices = (project.unitOptions || []).map((unit) => unit.price).filter((n) => Number.isFinite(n))
+  if (prices.length === 0) {
+    return { minPrice: project.startingPrice, maxPrice: project.startingPrice }
+  }
+  return {
+    minPrice: Math.min(...prices),
+    maxPrice: Math.max(...prices),
+  }
+}
+
+export function enrichBookingProject(project) {
+  if (!project) return null
+  const extras = PROJECT_EXTRAS[project.id] || {}
+  const range = derivePriceRange(project)
+  const installmentsAllowed =
+    extras.installmentsAllowed ??
+    (project.monthlyInstallment > 0 ||
+      (project.paymentPlan && project.paymentPlan !== 'Full Payment'))
+  return {
+    ...project,
+    ...extras,
+    minPrice: extras.minPrice ?? range.minPrice,
+    maxPrice: extras.maxPrice ?? range.maxPrice,
+    installmentsAllowed,
+    bankTransferAllowed: extras.bankTransferAllowed ?? true,
+    unitCounts: extras.unitCounts || {},
+    blog: extras.blog || {
+      title: `Inside ${project.name}`,
+      publishedAt: project.completionDate,
+      body: project.description,
+    },
+    timeline: extras.timeline || [
+      {
+        label: 'Expected completion',
+        date: project.completionDate,
+        status: 'upcoming',
+      },
+    ],
+    media: extras.media || project.gallery || [project.image].filter(Boolean),
+  }
+}
+
+export function getBookingProjects() {
+  return bookingProjects.map(enrichBookingProject)
+}
+
 /** @deprecated Prefer `bookingProjects` — kept for the unused home carousel component. */
 export const trendingProjects = bookingProjects.map((project) => ({
   id: project.id,
@@ -572,27 +764,29 @@ export const trendingProjects = bookingProjects.map((project) => ({
 
 export function getProjectById(id) {
   const base = bookingProjects.find((project) => project.id === id)
-  if (typeof window === 'undefined') return base
+  if (typeof window === 'undefined') return enrichBookingProject(base)
   try {
     const all = JSON.parse(localStorage.getItem('makan-agency-listings-v1') || '{}')
     for (const list of Object.values(all)) {
       const match = (list || []).find((item) => item.id === id && item.kind === 'booking')
       if (match) {
         if (match.disabled) return undefined
-        return {
+        return enrichBookingProject({
           ...match,
           name: match.name || match.title,
           startingPrice: match.startingPrice ?? match.price,
           gallery: match.images?.length ? match.images : match.gallery || [match.image].filter(Boolean),
-        }
+        })
       }
     }
   } catch {
     /* ignore */
   }
-  return base
+  return enrichBookingProject(base)
 }
 
 export function getOtherProjects(id, limit = 3) {
-  return bookingProjects.filter((project) => project.id !== id).slice(0, limit)
+  return getBookingProjects()
+    .filter((project) => project.id !== id)
+    .slice(0, limit)
 }

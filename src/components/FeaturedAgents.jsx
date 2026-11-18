@@ -53,13 +53,13 @@ function AgentCard({ agent }) {
       </div>
 
       <h3 className="mt-4 whitespace-nowrap font-display text-base font-bold text-slate-900 transition group-hover:text-brand">
-        {agent.name}
+        {agent.agency}
         <span className="font-sans text-[11px] font-semibold text-slate-400">
           {' '}
           | {agent.activeListings} listings
         </span>
       </h3>
-      <p className="mt-0.5 text-xs font-medium text-slate-500">{agent.agency}</p>
+      <p className="mt-0.5 text-xs font-medium text-slate-500">{agent.name}</p>
       <p className="mt-1.5 flex items-center justify-center gap-1 text-[11px] font-medium text-slate-400">
         <MapPin className="h-3 w-3" aria-hidden="true" />
         {agent.city}
