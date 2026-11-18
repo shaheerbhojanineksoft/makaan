@@ -393,7 +393,7 @@ export default function PropertyDetail() {
                       )}
                     </p>
                   </div>
-                  <ul className="grid grid-cols-2 gap-4 border-t border-dashed border-slate-200 pt-5 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
+                  <ul className="grid grid-cols-2 gap-3 border-t border-dashed border-slate-200 pt-5 sm:gap-4 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
                     {property.beds > 0 && (
                       <li className="text-sm font-bold text-slate-800">
                         <BedDouble className="mr-1.5 inline h-4 w-4 text-brand" aria-hidden="true" />

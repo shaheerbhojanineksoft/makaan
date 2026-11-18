@@ -137,14 +137,14 @@ export default function Favourites() {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setTab(id)}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition sm:flex-none ${
+                className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl px-2.5 py-2.5 text-xs font-bold transition sm:flex-none sm:gap-2 sm:px-4 sm:text-sm ${
                   isActive
                     ? 'bg-brand text-white shadow-md'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-brand'
                 }`}
               >
-                <Icon className="h-4 w-4" aria-hidden="true" />
-                {label}
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="truncate">{label}</span>
                 <span
                   className={`rounded-full px-2 py-0.5 text-[11px] font-extrabold ${
                     isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'

@@ -174,7 +174,9 @@ export default function AgencyHelpSupport() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold tracking-[0.16em] text-brand uppercase">Support</p>
-          <h1 className="mt-2 font-display text-3xl font-extrabold text-slate-900">Help & support</h1>
+          <h1 className="mt-2 font-display text-2xl font-extrabold text-slate-900 sm:text-3xl">
+            Help & support
+          </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-500">
             Track every issue you’ve raised with Makaan — pending, in review, or responded.
           </p>
@@ -219,7 +221,57 @@ export default function AgencyHelpSupport() {
         </div>
       </section>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+      <div className="space-y-3 md:hidden">
+        {requests.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-10 text-center">
+            <p className="font-semibold text-slate-700">No support requests yet</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Raise your first issue and we’ll track it here until it’s resolved.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white"
+            >
+              <PlusCircle className="h-4 w-4" />
+              New request
+            </button>
+          </div>
+        ) : (
+          requests.map((row) => (
+            <article
+              key={row.id}
+              className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm"
+            >
+              <div className="space-y-2 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h2 className="font-bold text-slate-900">{row.subject}</h2>
+                  <Badge variant={STATUS_VARIANT[row.status] || 'green'}>
+                    {SUPPORT_STATUSES[row.status] || row.status}
+                  </Badge>
+                </div>
+                {row.relatedId ? (
+                  <p className="text-xs text-slate-500">Ref: {row.relatedId}</p>
+                ) : null}
+                <p className="text-sm text-slate-600">{row.topic || '—'}</p>
+                <p className="text-xs text-slate-500">{formatDateTime(row.createdAt)}</p>
+              </div>
+              <div className="border-t border-slate-100 p-3">
+                <button
+                  type="button"
+                  onClick={() => setSelected(row)}
+                  className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-slate-200 px-2.5 py-2 text-xs font-bold text-brand hover:bg-brand-soft"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  View
+                </button>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-brand-soft/60 text-sm font-extrabold tracking-wide text-brand uppercase">

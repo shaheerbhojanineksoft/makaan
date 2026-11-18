@@ -161,9 +161,9 @@ function PlotGallery({ plot }) {
       </div>
 
       {images.length > 1 && (
-        <ul className="mt-3 grid grid-cols-3 gap-3">
+        <ul className="mt-3 flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {images.map((image, index) => (
-            <li key={`${image}-${index}`}>
+            <li key={`${image}-${index}`} className="w-[38%] shrink-0 sm:w-auto sm:shrink">
               <button
                 type="button"
                 onClick={() => setActive(index)}

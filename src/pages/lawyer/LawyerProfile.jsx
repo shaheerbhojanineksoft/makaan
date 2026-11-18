@@ -83,13 +83,13 @@ export default function LawyerProfile({ onSignOut }) {
 
   return (
     <div className="min-h-screen bg-offwhite">
-      <header className="border-b border-slate-200/80 bg-white">
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Logo link={false} />
           <button
             type="button"
             onClick={onSignOut}
-            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-3.5 py-2 text-sm font-bold text-rose-600 transition hover:bg-rose-50"
+            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-3 py-2 text-sm font-bold text-rose-600 transition hover:bg-rose-50 sm:px-3.5"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -97,13 +97,13 @@ export default function LawyerProfile({ onSignOut }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-8">
-        <div className="mb-6">
+      <main className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
+        <div className="mb-5 sm:mb-6">
           <p className="inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.16em] text-brand uppercase">
             <Scale className="h-3.5 w-3.5" />
             Lawyer profile
           </p>
-          <h1 className="mt-2 font-display text-3xl font-extrabold text-slate-900">
+          <h1 className="mt-2 font-display text-2xl font-extrabold text-slate-900 sm:text-3xl">
             Your details
           </h1>
           <p className="mt-2 text-sm text-slate-500">
@@ -113,7 +113,7 @@ export default function LawyerProfile({ onSignOut }) {
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-5 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7"
+          className="space-y-5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-7"
         >
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
             <button
@@ -130,7 +130,7 @@ export default function LawyerProfile({ onSignOut }) {
                 </span>
               )}
               <span className="absolute inset-0 grid place-items-center bg-slate-900/0 transition group-hover:bg-slate-900/40">
-                <Camera className="h-5 w-5 text-white opacity-0 transition group-hover:opacity-100" />
+                <Camera className="h-5 w-5 text-white opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100" />
               </span>
             </button>
             <input

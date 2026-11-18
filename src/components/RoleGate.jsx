@@ -99,20 +99,20 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
       aria-modal="true"
       aria-labelledby="role-gate-title"
       data-role-gate
-      className="fixed inset-0 z-[100] flex flex-col justify-center overflow-hidden bg-brand/85 px-4 py-5 backdrop-blur-xl sm:px-6"
+      className="fixed inset-0 z-[100] flex flex-col justify-center overflow-y-auto overscroll-contain bg-brand/85 px-4 py-6 backdrop-blur-xl sm:px-6 sm:py-8"
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-brand-light/25 blur-3xl" />
         <div className="absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
       </div>
 
-      <div className="animate-fade-up mx-auto w-full max-w-3xl">
+      <div className="animate-fade-up relative mx-auto w-full max-w-3xl py-2">
         <div className="flex flex-col items-center text-center">
           <Logo variant="dark" link={false} />
 
           <h1
             id="role-gate-title"
-            className="mt-4 font-display text-2xl leading-tight font-extrabold text-balance text-white sm:mt-8 sm:text-4xl"
+            className="mt-4 font-display text-[1.65rem] leading-tight font-extrabold text-balance text-white sm:mt-8 sm:text-4xl"
           >
             {title}
           </h1>
@@ -123,15 +123,15 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
 
         {!path ? (
           <>
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-5">
+            <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-5">
               <button
                 ref={enterRef}
                 type="button"
                 onClick={() => setPath('user')}
-                className="group flex flex-col rounded-2xl bg-white p-3.5 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:p-7"
+                className="group flex flex-col rounded-2xl bg-white p-4 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:p-7"
               >
                 <span className="flex w-full flex-wrap items-center justify-between gap-2">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand text-white sm:h-11 sm:w-11">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand text-white">
                     <UserRound className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <ArrowRight
@@ -140,10 +140,10 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
                   />
                 </span>
 
-                <span className="mt-3 block font-display text-sm leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
+                <span className="mt-3 block font-display text-base leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
                   Sign in as User
                 </span>
-                <span className="mt-1.5 block line-clamp-3 text-[11px] leading-relaxed text-slate-600 sm:mt-2 sm:text-sm sm:line-clamp-none">
+                <span className="mt-1.5 block text-sm leading-relaxed text-slate-600 sm:mt-2">
                   Search verified listings, book viewings and save the properties you like.
                 </span>
               </button>
@@ -151,10 +151,10 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
               <button
                 type="button"
                 onClick={() => setPath('agency')}
-                className="group flex flex-col rounded-2xl bg-white p-3.5 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:p-7"
+                className="group flex flex-col rounded-2xl bg-white p-4 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:p-7"
               >
                 <span className="flex w-full flex-wrap items-center justify-between gap-2">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand text-white sm:h-11 sm:w-11">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand text-white">
                     <Building2 className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <ArrowRight
@@ -163,23 +163,35 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
                   />
                 </span>
 
-                <span className="mt-3 block font-display text-sm leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
+                <span className="mt-3 block font-display text-base leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
                   Sign in as Agency
                 </span>
-                <span className="mt-1.5 block line-clamp-3 text-[11px] leading-relaxed text-slate-600 sm:mt-2 sm:text-sm sm:line-clamp-none">
+                <span className="mt-1.5 block text-sm leading-relaxed text-slate-600 sm:mt-2">
                   Manage your brand, listings, recommendations and reach buyers across Pakistan.
                 </span>
               </button>
-            </div>
 
-            <div className="mt-5 flex justify-center sm:mt-6">
               <button
                 type="button"
                 onClick={() => setPath('lawyer')}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-[11px] font-bold text-white/90 ring-1 ring-white/25 transition hover:bg-white/15 hover:text-white sm:text-xs"
+                className="group flex flex-col rounded-2xl bg-white p-4 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:col-span-2 sm:mx-auto sm:max-w-md sm:p-7"
               >
-                <Scale className="h-3.5 w-3.5" />
-                Sign in as lawyer
+                <span className="flex w-full flex-wrap items-center justify-between gap-2">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand text-white">
+                    <Scale className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <ArrowRight
+                    className="h-5 w-5 shrink-0 text-brand transition-transform duration-300 group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <span className="mt-3 block font-display text-base leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
+                  Sign in as Lawyer
+                </span>
+                <span className="mt-1.5 block text-sm leading-relaxed text-slate-600 sm:mt-2">
+                  Manage your trusted lawyer profile and stay ready for client referrals.
+                </span>
               </button>
             </div>
 
@@ -210,18 +222,20 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
               type="button"
               onClick={handleGoogleSignIn}
               disabled={signingIn}
-              className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl bg-white px-6 py-4 text-sm font-bold text-slate-800 shadow-xl shadow-brand-dark/25 transition hover:-translate-y-0.5 hover:shadow-2xl disabled:cursor-wait disabled:opacity-80 sm:min-w-[300px] sm:text-base"
+              className="inline-flex w-full max-w-sm items-center justify-center gap-3 rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-800 shadow-xl shadow-brand-dark/25 transition hover:-translate-y-0.5 hover:shadow-2xl disabled:cursor-wait disabled:opacity-80 sm:max-w-none sm:min-w-[300px] sm:px-6 sm:text-base"
             >
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-white ring-1 ring-slate-200">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white ring-1 ring-slate-200">
                 <GoogleIcon className="h-5 w-5" />
               </span>
-              {signingIn
-                ? 'Signing in…'
-                : isUserPath
-                  ? 'Continue with Google as User'
-                  : isAgencyPath
-                    ? 'Continue with Google as Agency'
-                    : 'Continue with Google as Lawyer'}
+              <span className="text-left leading-snug">
+                {signingIn
+                  ? 'Signing in…'
+                  : isUserPath
+                    ? 'Continue with Google as User'
+                    : isAgencyPath
+                      ? 'Continue with Google as Agency'
+                      : 'Continue with Google as Lawyer'}
+              </span>
             </button>
 
             <button

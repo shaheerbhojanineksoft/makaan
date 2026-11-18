@@ -60,7 +60,7 @@ export default function Navbar({ onSignOut }) {
         isScrolled ? 'border-slate-200 shadow-sm' : 'border-transparent'
       }`}
     >
-      <nav className="flex min-h-[5.75rem] w-full items-center justify-between gap-4 px-4 py-7 sm:min-h-[6.25rem] sm:px-5 lg:px-6 xl:px-8">
+      <nav className="flex min-h-[4.25rem] w-full items-center justify-between gap-3 px-4 py-3 sm:min-h-[5rem] sm:gap-4 sm:px-5 sm:py-5 lg:min-h-[6.25rem] lg:px-6 lg:py-7 xl:px-8">
         <Logo />
 
         {/* Desktop navigation — pinned to the right edge */}
@@ -106,9 +106,9 @@ export default function Navbar({ onSignOut }) {
             aria-expanded={isOpen}
             aria-controls="mobile-menu"
             aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            className="grid h-14 w-14 place-items-center rounded-xl border border-slate-200 text-brand transition hover:bg-brand-soft"
+            className="grid h-11 w-11 place-items-center rounded-xl border border-slate-200 text-brand transition hover:bg-brand-soft sm:h-12 sm:w-12"
           >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </nav>

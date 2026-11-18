@@ -185,7 +185,7 @@ function ImageUploadCards({ images, onChange }) {
             <button
               type="button"
               onClick={() => onChange(images.filter((_, i) => i !== index))}
-              className="absolute top-2 right-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-rose-600 opacity-0 shadow transition group-hover:opacity-100"
+              className="absolute top-2 right-2 grid h-8 w-8 place-items-center rounded-full bg-white/95 text-rose-600 shadow transition opacity-100 sm:h-7 sm:w-7 sm:opacity-0 sm:group-hover:opacity-100"
               aria-label="Remove image"
             >
               <X className="h-3.5 w-3.5" />

@@ -40,7 +40,9 @@ export default function AgencyReels() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold tracking-[0.16em] text-brand uppercase">Content</p>
-          <h1 className="mt-2 font-display text-3xl font-extrabold text-slate-900">My reels</h1>
+          <h1 className="mt-2 font-display text-2xl font-extrabold text-slate-900 sm:text-3xl">
+            My reels
+          </h1>
           <p className="mt-2 text-sm text-slate-500">
             Upload short property videos (10–60 seconds) for the Makaan Reels feed.
           </p>
@@ -54,7 +56,93 @@ export default function AgencyReels() {
         </Link>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+      <div className="space-y-3 md:hidden">
+        {reels.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-10 text-center text-sm font-semibold text-slate-500">
+            No reels yet. Create your first property reel.
+          </div>
+        ) : (
+          reels.map((reel) => {
+            const isDisabled = Boolean(reel.disabled)
+            return (
+              <article
+                key={reel.id}
+                className={`overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm ${
+                  isDisabled ? 'opacity-80' : ''
+                }`}
+              >
+                <div className="flex gap-3 p-3">
+                  <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl bg-brand-soft">
+                    {reel.poster || reel.video ? (
+                      <img
+                        src={reel.poster || reel.video}
+                        alt=""
+                        className={`h-full w-full object-cover ${isDisabled ? 'grayscale' : ''}`}
+                      />
+                    ) : (
+                      <span className="grid h-full place-items-center text-brand">
+                        <Clapperboard className="h-5 w-5" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <h2 className="font-bold text-slate-900">{reel.title}</h2>
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-extrabold ${
+                          isDisabled ? 'bg-slate-200 text-slate-600' : 'bg-brand-soft text-brand'
+                        }`}
+                      >
+                        {isDisabled ? 'Disabled' : 'Active'}
+                      </span>
+                    </div>
+                    <p className="mt-1 truncate text-xs text-slate-500">{reel.purpose}</p>
+                    <p className="mt-2 text-xs font-semibold text-slate-600">
+                      {[reel.city, reel.area, reel.projectType].filter(Boolean).join(' · ')}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {reel.durationSec ? `${Math.round(reel.durationSec)}s` : '—'}
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 border-t border-slate-100 p-3">
+                  <button
+                    type="button"
+                    onClick={() => onToggleDisabled(reel)}
+                    className={`inline-flex items-center justify-center gap-1 rounded-xl border px-2.5 py-2 text-xs font-bold ${
+                      isDisabled
+                        ? 'border-brand/20 text-brand hover:bg-brand-soft'
+                        : 'border-amber-200 text-amber-700 hover:bg-amber-50'
+                    }`}
+                  >
+                    {isDisabled ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Enable
+                      </>
+                    ) : (
+                      <>
+                        <Ban className="h-3.5 w-3.5" />
+                        Disable
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(reel)}
+                    className="inline-flex items-center justify-center gap-1 rounded-xl border border-rose-200 px-2.5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete
+                  </button>
+                </div>
+              </article>
+            )
+          })
+        )}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-brand-soft/60 text-sm font-extrabold tracking-wide text-brand uppercase">

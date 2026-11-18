@@ -40,6 +40,8 @@ import AgencyHelpSupport from './pages/agency/AgencyHelpSupport'
 import AgencyClientQueries from './pages/agency/AgencyClientQueries'
 import AgencyReels from './pages/agency/AgencyReels'
 import AgencyReelForm from './pages/agency/AgencyReelForm'
+import AgencyDeals from './pages/agency/AgencyDeals'
+import AgencyDealForm from './pages/agency/AgencyDealForm'
 import LawyerProfile from './pages/lawyer/LawyerProfile'
 import {
   clearSession,
@@ -209,6 +211,8 @@ export default function App() {
               <Route path="recommendations/:id/edit" element={<CreateRecommendation />} />
               <Route path="reels" element={<AgencyReels />} />
               <Route path="reels/new" element={<AgencyReelForm />} />
+              <Route path="deals" element={<AgencyDeals />} />
+              <Route path="deals/new" element={<AgencyDealForm />} />
               <Route path="client-queries" element={<AgencyClientQueries />} />
               <Route path="help-support" element={<AgencyHelpSupport />} />
             </Route>

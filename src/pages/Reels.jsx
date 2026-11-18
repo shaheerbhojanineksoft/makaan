@@ -218,10 +218,10 @@ export default function Reels() {
   }
 
   return (
-    <section className="fixed inset-0 z-[80] flex flex-col bg-white">
+    <section className="fixed inset-0 z-[80] flex flex-col bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <audio ref={audioRef} preload="auto" />
 
-      <div className="flex shrink-0 items-center gap-3 px-4 py-4 sm:px-6">
+      <div className="flex shrink-0 items-center gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <button
           type="button"
           onClick={goBack}
@@ -233,18 +233,23 @@ export default function Reels() {
         <p className="text-sm font-bold text-slate-500">Reels</p>
       </div>
 
-      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-1 sm:px-6 lg:px-8">
-        <aside className="relative z-10 mb-5 w-full max-w-sm lg:absolute lg:top-1 lg:left-4 lg:mb-0 lg:w-60 xl:left-8 xl:w-64">
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden px-3 pb-3 sm:px-6 sm:pb-6 lg:overflow-y-auto lg:px-8">
+        {/* Mobile: horizontal creators strip above player */}
+        <aside className="mb-3 shrink-0 lg:absolute lg:top-1 lg:left-4 lg:mb-0 lg:w-60 xl:left-8 xl:w-64">
           <p className="text-[11px] font-extrabold tracking-[0.16em] text-brand uppercase">Creators</p>
-          <h2 className="mt-1.5 font-display text-xl font-extrabold text-slate-900">Top Creators</h2>
-          <p className="mt-1 text-xs text-slate-500">Agencies leading Makaan Reels this week.</p>
+          <h2 className="mt-1 font-display text-lg font-extrabold text-slate-900 sm:text-xl">
+            Top Creators
+          </h2>
+          <p className="mt-0.5 hidden text-xs text-slate-500 lg:block">
+            Agencies leading Makaan Reels this week.
+          </p>
 
-          <ul className="mt-4 space-y-3">
+          <ul className="mt-3 flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] lg:flex-col lg:space-y-3 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
             {TOP_CREATORS.map((creator, index) => (
-              <li key={creator.id}>
+              <li key={creator.id} className="shrink-0 lg:shrink">
                 <Link
                   to={`/agents/${creator.id}`}
-                  className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_1px_2px_rgb(15_23_42/0.04)] transition hover:border-brand/25 hover:bg-brand-soft/40"
+                  className="flex w-[11.5rem] items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] transition hover:border-brand/25 hover:bg-brand-soft/40 lg:w-auto lg:gap-3 lg:p-3"
                 >
                   <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-brand-soft text-[11px] font-extrabold text-brand">
                     {index + 1}
@@ -252,12 +257,14 @@ export default function Reels() {
                   <img
                     src={creator.avatar}
                     alt=""
-                    className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-brand/15"
+                    className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-brand/15 lg:h-11 lg:w-11"
                   />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-extrabold text-slate-900">{creator.agency}</p>
+                    <p className="truncate text-xs font-extrabold text-slate-900 lg:text-sm">
+                      {creator.agency}
+                    </p>
                     <p className="truncate text-[11px] font-semibold text-slate-500">{creator.name}</p>
-                    <p className="truncate text-[11px] text-slate-400">{creator.city}</p>
+                    <p className="hidden truncate text-[11px] text-slate-400 lg:block">{creator.city}</p>
                   </div>
                 </Link>
               </li>
@@ -265,8 +272,8 @@ export default function Reels() {
           </ul>
         </aside>
 
-        <div className="flex min-h-[min(820px,calc(100dvh-7.5rem))] items-center justify-center">
-          <div className="aspect-[9/16] h-[min(820px,calc(100dvh-7.5rem))] w-auto max-w-[min(100%,420px)] overflow-hidden rounded-2xl bg-black shadow-[0_18px_50px_rgb(15_23_42/0.18)] ring-1 ring-slate-200/80">
+        <div className="flex min-h-0 flex-1 items-center justify-center lg:min-h-[min(820px,calc(100dvh-7.5rem))]">
+          <div className="aspect-[9/16] h-full max-h-[min(820px,calc(100dvh-11rem))] w-auto max-w-[min(100%,420px)] overflow-hidden rounded-2xl bg-black shadow-[0_18px_50px_rgb(15_23_42/0.18)] ring-1 ring-slate-200/80 sm:max-h-[min(820px,calc(100dvh-9rem))]">
             <div
               ref={scrollerRef}
               className="h-full snap-y snap-mandatory overflow-y-auto overscroll-y-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

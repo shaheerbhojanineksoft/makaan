@@ -94,7 +94,9 @@ export default function AgencyClientQueries() {
     <div className="space-y-6">
       <div>
         <p className="text-[11px] font-extrabold tracking-[0.16em] text-brand uppercase">Leads</p>
-        <h1 className="mt-2 font-display text-3xl font-extrabold text-slate-900">Client queries</h1>
+        <h1 className="mt-2 font-display text-2xl font-extrabold text-slate-900 sm:text-3xl">
+          Client queries
+        </h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-500">
           Full name, email, phone and message from clients who submitted a query on your listings.
         </p>
@@ -115,7 +117,42 @@ export default function AgencyClientQueries() {
         </div>
       </section>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+      <div className="space-y-3 md:hidden">
+        {rows.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-10 text-center">
+            <p className="font-semibold text-slate-700">No client queries yet</p>
+            <p className="mt-1 text-sm text-slate-500">
+              When a buyer submits a query on one of your listings, it will show up here.
+            </p>
+          </div>
+        ) : (
+          rows.map((row) => (
+            <article
+              key={row.id}
+              className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm"
+            >
+              <div className="space-y-2 p-4">
+                <h2 className="font-bold text-slate-900">{row.name || '—'}</h2>
+                <p className="break-all text-sm text-slate-600">{row.email || '—'}</p>
+                <p className="text-sm font-semibold text-slate-700">{row.phone || '—'}</p>
+                <p className="line-clamp-3 text-sm text-slate-600">{row.message || '—'}</p>
+              </div>
+              <div className="border-t border-slate-100 p-3">
+                <button
+                  type="button"
+                  onClick={() => setSelected(row)}
+                  className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-slate-200 px-2.5 py-2 text-xs font-bold text-brand hover:bg-brand-soft"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  View
+                </button>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-brand-soft/60 text-sm font-extrabold tracking-wide text-brand uppercase">

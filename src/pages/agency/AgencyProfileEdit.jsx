@@ -253,7 +253,7 @@ export default function AgencyProfileEdit() {
                 </span>
               )}
               <span className="absolute inset-0 grid place-items-center bg-slate-900/0 transition group-hover:bg-slate-900/40">
-                <Camera className="h-5 w-5 text-white opacity-0 transition group-hover:opacity-100" />
+                <Camera className="h-5 w-5 text-white opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100" />
               </span>
             </button>
             <input
