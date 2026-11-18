@@ -115,7 +115,7 @@ export default function SearchableSelect({
         aria-label={label}
         onClick={() => setOpen((current) => !current)}
         onKeyDown={handleTriggerKeyDown}
-        className={`flex w-full items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-left shadow-sm transition ring-1 ${
+        className={`flex h-12 w-full items-center gap-2 rounded-xl bg-white px-3.5 text-left shadow-sm transition ring-1 ${
           open
             ? 'ring-2 ring-brand-light/60'
             : invalid

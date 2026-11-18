@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  Bath,
+  BedDouble,
   Building2,
   KeyRound,
   LandPlot,
@@ -24,6 +26,28 @@ const SEARCH_MODES = [
   { id: 'filters', label: 'Filters', icon: SlidersHorizontal },
   { id: 'ask', label: 'Ask Makan', icon: Wand2 },
 ]
+
+const BEDS_OPTIONS = [
+  { value: '', label: 'Any' },
+  { value: '1', label: '1+' },
+  { value: '2', label: '2+' },
+  { value: '3', label: '3+' },
+  { value: '4', label: '4+' },
+  { value: '5', label: '5+' },
+]
+
+const BATHS_OPTIONS = [
+  { value: '', label: 'Any' },
+  { value: '1', label: '1+' },
+  { value: '2', label: '2+' },
+  { value: '3', label: '3+' },
+  { value: '4', label: '4+' },
+]
+
+function hidesRoomFilters(type) {
+  const value = String(type || '').toLowerCase()
+  return value.includes('plot') || value === 'building' || value === 'shop' || value === 'office'
+}
 
 function AnimatedStat({ stat }) {
   const [count, setCount] = useState(0)
@@ -95,6 +119,8 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
   const [city, setCity] = useState('')
   const [area, setArea] = useState('')
   const [propertyType, setPropertyType] = useState('')
+  const [beds, setBeds] = useState('')
+  const [baths, setBaths] = useState('')
   const [maxPrice, setMaxPrice] = useState(PRICE.buy.defaultValue)
   const [askQuery, setAskQuery] = useState('')
   const [isUnderstanding, setIsUnderstanding] = useState(false)
@@ -105,6 +131,7 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
   const bounds = PRICE[activeTab]
   const typeOptions = PROPERTY_TYPES
   const areaOptions = useMemo(() => areasForCity(city), [city])
+  const showRoomFilters = Boolean(propertyType) && !hidesRoomFilters(propertyType)
 
   const sliderPercent = useMemo(() => {
     const { min, max } = bounds
@@ -127,7 +154,18 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
     if (nextTab === activeTab) return
     setActiveTab(nextTab)
     setPropertyType('')
+    setBeds('')
+    setBaths('')
     setMaxPrice(PRICE[nextTab].defaultValue)
+    setValidationMessage('')
+  }
+
+  function handlePropertyTypeChange(next) {
+    setPropertyType(next)
+    if (!next || hidesRoomFilters(next)) {
+      setBeds('')
+      setBaths('')
+    }
     setValidationMessage('')
   }
 
@@ -138,6 +176,13 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
       return
     }
 
+    const roomFilters = showRoomFilters
+      ? {
+          beds: beds ? Number(beds) : null,
+          baths: baths ? Number(baths) : null,
+        }
+      : { beds: null, baths: null }
+
     setValidationMessage('')
     onSearch?.({
       purpose: activeTab,
@@ -145,6 +190,7 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
       area,
       propertyType,
       maxPrice,
+      ...roomFilters,
       source: 'filters',
     })
   }
@@ -262,7 +308,7 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
                 })}
               </div>
 
-              <div className="relative z-20 grid items-stretch gap-3 overflow-visible sm:grid-cols-2 lg:grid-cols-12">
+              <div className="relative z-20 grid items-center gap-3 overflow-visible sm:grid-cols-2 lg:grid-cols-12">
                 <SearchableSelect
                   className="lg:col-span-2"
                   icon={MapPin}
@@ -301,23 +347,22 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
                   emptyLabel="All Property Types"
                   required
                   invalid={Boolean(validationMessage && !propertyType)}
-                  onChange={(next) => {
-                    setPropertyType(next)
-                    setValidationMessage('')
-                  }}
+                  onChange={handlePropertyTypeChange}
                 />
 
-                <div className="flex flex-col justify-center rounded-xl bg-white px-3 py-2.5 shadow-sm sm:col-span-2 lg:col-span-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="flex items-center gap-1.5 text-[11px] font-bold tracking-wide text-slate-500 uppercase">
-                      <SlidersHorizontal className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
-                      {tab.priceLabel}
+                <div className="flex h-12 flex-col justify-center rounded-xl bg-white px-3.5 shadow-sm sm:col-span-2 lg:col-span-3">
+                  <div className="flex items-center justify-between gap-2 leading-none">
+                    <span className="flex min-w-0 items-center gap-1.5 text-[10px] font-bold tracking-wide text-slate-500 uppercase">
+                      <SlidersHorizontal className="h-3.5 w-3.5 shrink-0 text-brand" aria-hidden="true" />
+                      <span className="truncate">{tab.priceLabel}</span>
                     </span>
-                    <span className="text-xs font-extrabold text-brand">{formatPKR(maxPrice)}</span>
+                    <span className="shrink-0 text-xs font-extrabold text-brand">
+                      {formatPKR(maxPrice)}
+                    </span>
                   </div>
                   <input
                     type="range"
-                    className="price-range mt-2"
+                    className="price-range mt-1.5"
                     min={bounds.min}
                     max={bounds.max}
                     step={bounds.step}
@@ -332,12 +377,72 @@ export default function HeroSearch({ onSearch, showTrustStrip = true }) {
 
                 <button
                   type="submit"
-                  className="group flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-brand/30 transition hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl sm:col-span-2 lg:col-span-2"
+                  className="group flex h-12 items-center justify-center gap-2 rounded-xl bg-brand px-6 text-sm font-bold text-white shadow-lg shadow-brand/30 transition hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl sm:col-span-2 lg:col-span-2"
                 >
                   <Search className="h-4 w-4 transition-transform group-hover:scale-110" />
                   Search
                 </button>
               </div>
+
+              {showRoomFilters ? (
+                <div className="mt-3 flex flex-col gap-3 rounded-2xl bg-brand-dark/35 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-4">
+                  <p className="text-[11px] font-bold tracking-wide text-brand-soft/80 uppercase sm:shrink-0">
+                    Optional
+                  </p>
+
+                  <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white/90">
+                      <BedDouble className="h-3.5 w-3.5 text-brand-light" aria-hidden="true" />
+                      Bedrooms
+                    </span>
+                    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Bedrooms">
+                      {BEDS_OPTIONS.map((option) => {
+                        const active = beds === option.value
+                        return (
+                          <button
+                            key={`beds-${option.value || 'any'}`}
+                            type="button"
+                            onClick={() => setBeds(option.value)}
+                            className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition ${
+                              active
+                                ? 'bg-white text-brand shadow-sm'
+                                : 'bg-white/10 text-brand-soft hover:bg-white/20 hover:text-white'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white/90">
+                      <Bath className="h-3.5 w-3.5 text-brand-light" aria-hidden="true" />
+                      Bathrooms
+                    </span>
+                    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Bathrooms">
+                      {BATHS_OPTIONS.map((option) => {
+                        const active = baths === option.value
+                        return (
+                          <button
+                            key={`baths-${option.value || 'any'}`}
+                            type="button"
+                            onClick={() => setBaths(option.value)}
+                            className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition ${
+                              active
+                                ? 'bg-white text-brand shadow-sm'
+                                : 'bg-white/10 text-brand-soft hover:bg-white/20 hover:text-white'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </form>
           ) : (
             <form onSubmit={handleAskSubmit}>

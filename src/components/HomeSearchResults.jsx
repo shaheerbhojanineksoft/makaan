@@ -81,6 +81,7 @@ function getMatches(filters) {
   const maxPrice = filters.maxPrice
   const keyword = filters.keyword || ''
   const beds = filters.beds ?? null
+  const baths = filters.baths ?? null
 
   if (filters.purpose === 'booking') {
     return {
@@ -112,6 +113,7 @@ function getMatches(filters) {
     if (!matchesPropertyType(property, propertyType)) return false
     if (maxPrice != null && property.price > maxPrice) return false
     if (beds != null && property.beds < beds) return false
+    if (baths != null && property.baths < baths) return false
     if (
       !matchesKeyword(
         [property.title, property.location, property.city, property.propertyType],
@@ -151,6 +153,7 @@ function buildFilterSummary(filters) {
   if (filters.area) parts.push(filters.area)
   if (filters.propertyType) parts.push(filters.propertyType)
   if (filters.beds) parts.push(`${filters.beds}+ beds`)
+  if (filters.baths) parts.push(`${filters.baths}+ baths`)
   if (filters.keyword) parts.push(`“${filters.keyword}”`)
   if (filters.maxPrice != null) parts.push(`Up to ${formatPKR(filters.maxPrice)}`)
   return parts.length > 0 ? parts.join(' · ') : 'All matching listings'
@@ -164,6 +167,7 @@ function InterpretedChips({ filters }) {
     filters.city && { label: 'City', value: filters.city },
     filters.propertyType && { label: 'Type', value: filters.propertyType },
     filters.beds && { label: 'Beds', value: `${filters.beds}+` },
+    filters.baths && { label: 'Baths', value: `${filters.baths}+` },
     filters.keyword && { label: 'Area', value: filters.keyword },
     filters.maxPrice != null && { label: 'Budget', value: formatPKR(filters.maxPrice) },
   ].filter(Boolean)
