@@ -12,6 +12,11 @@ const EMPTY_PROFILE = {
   phone: '',
   whatsapp: '',
   avatar: '',
+  registered: false,
+}
+
+export function isLawyerRegistered(lawyerId = DEMO_LAWYER_ID) {
+  return Boolean(getLawyerProfile(lawyerId).registered)
 }
 
 function emit() {

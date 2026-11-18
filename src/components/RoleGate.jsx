@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, Building2, Scale, UserRound } from 'lucide-react'
+import { ArrowLeft, Building2, Scale, UserRound } from 'lucide-react'
 
 import Logo from './ui/Logo'
+
+const ROLE_OPTIONS = [
+  { id: 'user', label: 'Sign in as User', Icon: UserRound },
+  { id: 'agency', label: 'Sign in as Agency', Icon: Building2 },
+  { id: 'lawyer', label: 'Sign in as Lawyer', Icon: Scale },
+]
 
 function GoogleIcon({ className = 'h-5 w-5' }) {
   return (
@@ -123,79 +129,29 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
 
         {!path ? (
           <>
-            <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-5">
-              <button
-                ref={enterRef}
-                type="button"
-                onClick={() => setPath('user')}
-                className="group flex flex-col rounded-2xl bg-white p-4 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:p-7"
-              >
-                <span className="flex w-full flex-wrap items-center justify-between gap-2">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand text-white">
-                    <UserRound className="h-5 w-5" aria-hidden="true" />
+            <div className="mt-8 flex items-start justify-center gap-3 sm:mt-10 sm:gap-8">
+              {ROLE_OPTIONS.map(({ id, label, Icon }, index) => (
+                <button
+                  key={id}
+                  ref={index === 0 ? enterRef : undefined}
+                  type="button"
+                  onClick={() => setPath(id)}
+                  className="group flex w-[6.5rem] flex-col items-center gap-3 rounded-2xl px-1 py-2 text-center transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:w-32 sm:gap-3.5"
+                >
+                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white text-brand shadow-lg shadow-brand-dark/25 transition duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-brand-dark/35 group-active:translate-y-0 group-active:scale-95 sm:h-16 sm:w-16">
+                    <Icon
+                      className="h-6 w-6 transition duration-300 group-hover:rotate-6 group-active:rotate-0 sm:h-7 sm:w-7"
+                      aria-hidden="true"
+                    />
                   </span>
-                  <ArrowRight
-                    className="h-5 w-5 shrink-0 text-brand transition-transform duration-300 group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </span>
-
-                <span className="mt-3 block font-display text-base leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
-                  Sign in as User
-                </span>
-                <span className="mt-1.5 block text-sm leading-relaxed text-slate-600 sm:mt-2">
-                  Search verified listings, book viewings and save the properties you like.
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPath('agency')}
-                className="group flex flex-col rounded-2xl bg-white p-4 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:p-7"
-              >
-                <span className="flex w-full flex-wrap items-center justify-between gap-2">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand text-white">
-                    <Building2 className="h-5 w-5" aria-hidden="true" />
+                  <span className="text-[11px] leading-snug font-bold text-white/95 transition duration-300 group-hover:text-white sm:text-sm">
+                    {label}
                   </span>
-                  <ArrowRight
-                    className="h-5 w-5 shrink-0 text-brand transition-transform duration-300 group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </span>
-
-                <span className="mt-3 block font-display text-base leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
-                  Sign in as Agency
-                </span>
-                <span className="mt-1.5 block text-sm leading-relaxed text-slate-600 sm:mt-2">
-                  Manage your brand, listings, recommendations and reach buyers across Pakistan.
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPath('lawyer')}
-                className="group flex flex-col rounded-2xl bg-white p-4 text-left shadow-xl shadow-brand-dark/25 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl sm:col-span-2 sm:mx-auto sm:max-w-md sm:p-7"
-              >
-                <span className="flex w-full flex-wrap items-center justify-between gap-2">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand text-white">
-                    <Scale className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <ArrowRight
-                    className="h-5 w-5 shrink-0 text-brand transition-transform duration-300 group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </span>
-
-                <span className="mt-3 block font-display text-base leading-snug font-bold text-slate-900 sm:mt-5 sm:text-lg">
-                  Sign in as Lawyer
-                </span>
-                <span className="mt-1.5 block text-sm leading-relaxed text-slate-600 sm:mt-2">
-                  Manage your trusted lawyer profile and stay ready for client referrals.
-                </span>
-              </button>
+                </button>
+              ))}
             </div>
 
-            <p className="mt-4 text-center text-[11px] text-brand-soft/60 sm:mt-6 sm:text-xs">
+            <p className="mt-6 text-center text-[11px] text-brand-soft/60 sm:mt-8 sm:text-xs">
               User, agency and lawyer databases stay separate — each path creates its own Google-linked
               account.
             </p>
