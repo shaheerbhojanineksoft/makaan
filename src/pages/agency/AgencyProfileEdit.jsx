@@ -106,6 +106,7 @@ export default function AgencyProfileEdit() {
     agency: saved?.agency || '',
     city: saved?.city || '',
     phone: saved?.phone || '',
+    whatsapp: saved?.whatsapp || '',
     email: saved?.email || '',
     officeAddress: saved?.officeAddress || '',
     bio: saved?.bio || '',
@@ -147,6 +148,7 @@ export default function AgencyProfileEdit() {
       agency: form.agency.trim(),
       city: form.city,
       phone: form.phone.trim(),
+      whatsapp: form.whatsapp.trim(),
       email: form.email.trim(),
       officeAddress: form.officeAddress.trim(),
       bio: form.bio.trim(),
@@ -298,8 +300,25 @@ export default function AgencyProfileEdit() {
                 onChange={(e) => set('licenseNumber', e.target.value)}
               />
             </Field>
-            <Field label="Phone">
-              <input className={FIELD} value={form.phone} onChange={(e) => set('phone', e.target.value)} required />
+            <Field label="Phone number">
+              <input
+                className={FIELD}
+                type="tel"
+                value={form.phone}
+                onChange={(e) => set('phone', e.target.value)}
+                placeholder="+92 300 0000000"
+                required
+              />
+            </Field>
+            <Field label="Phone number (WhatsApp)">
+              <input
+                className={FIELD}
+                type="tel"
+                value={form.whatsapp}
+                onChange={(e) => set('whatsapp', e.target.value)}
+                placeholder="0323 2910307"
+                required
+              />
             </Field>
             <Field label="Email">
               <input
