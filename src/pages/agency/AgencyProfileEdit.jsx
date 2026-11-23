@@ -110,7 +110,7 @@ export default function AgencyProfileEdit() {
     email: saved?.email || '',
     officeAddress: saved?.officeAddress || '',
     bio: saved?.bio || '',
-    avatar: saved?.avatar || '',
+    profilePicture: saved?.profilePicture || saved?.avatar || '',
     coverImage: saved?.coverImage || '',
     licenseNumber: saved?.licenseNumber || '',
     responseTime: saved?.responseTime || '',
@@ -152,7 +152,8 @@ export default function AgencyProfileEdit() {
       email: form.email.trim(),
       officeAddress: form.officeAddress.trim(),
       bio: form.bio.trim(),
-      avatar: form.avatar.trim(),
+      profilePicture: form.profilePicture.trim(),
+      avatar: form.profilePicture.trim(),
       coverImage: form.coverImage.trim(),
       licenseNumber: form.licenseNumber.trim(),
       responseTime: form.responseTime.trim(),
@@ -247,8 +248,8 @@ export default function AgencyProfileEdit() {
               className="group relative block h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-brand-soft shadow-md sm:h-28 sm:w-28"
               aria-label="Change profile photo"
             >
-              {form.avatar ? (
-                <img src={form.avatar} alt="" className="h-full w-full object-cover" />
+              {form.profilePicture ? (
+                <img src={form.profilePicture} alt="" className="h-full w-full object-cover" />
               ) : (
                 <span className="grid h-full place-items-center text-brand">
                   <Camera className="h-7 w-7" />
@@ -265,7 +266,7 @@ export default function AgencyProfileEdit() {
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0]
-                readImageFile(file, (dataUrl) => set('avatar', dataUrl))
+                readImageFile(file, (dataUrl) => set('profilePicture', dataUrl))
                 e.target.value = ''
               }}
             />
