@@ -8,11 +8,14 @@ function readRaw() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')
     if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_USER }
+    const profilePicture =
+      parsed.profilePicture || parsed.avatar || DEFAULT_USER.profilePicture || DEFAULT_USER.avatar
     return {
       ...DEFAULT_USER,
       ...parsed,
       id: DEFAULT_USER.id,
-      avatar: parsed.avatar || DEFAULT_USER.avatar,
+      profilePicture,
+      avatar: profilePicture,
     }
   } catch {
     return { ...DEFAULT_USER }

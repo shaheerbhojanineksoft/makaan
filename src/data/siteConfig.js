@@ -22,6 +22,7 @@ export const CURRENT_USER = {
   name: 'Ali Hassan',
   email: 'ali.hassan@email.com',
   phone: '+92 300 1234567',
+  profilePicture: 'https://randomuser.me/api/portraits/men/75.jpg',
   avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
 }
 

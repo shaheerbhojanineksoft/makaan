@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Mail, Phone, UserRound } from 'lucide-react'
+import { Camera, Mail, Phone, UserRound } from 'lucide-react'
 
 import { updateCurrentUser, useCurrentUser } from '../utils/currentUser'
 
@@ -16,13 +16,24 @@ function Field({ label, htmlFor, children }) {
   )
 }
 
+function readImageFile(file, onReady) {
+  if (!file || !file.type.startsWith('image/')) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    if (typeof reader.result === 'string') onReady(reader.result)
+  }
+  reader.readAsDataURL(file)
+}
+
 export default function Profile() {
   const navigate = useNavigate()
   const saved = useCurrentUser()
+  const photoInputRef = useRef(null)
   const [form, setForm] = useState({
     name: saved.name || '',
     email: saved.email || '',
     phone: saved.phone || '',
+    profilePicture: saved.profilePicture || saved.avatar || '',
   })
 
   function set(key, value) {
@@ -35,6 +46,8 @@ export default function Profile() {
       name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
+      profilePicture: form.profilePicture.trim(),
+      avatar: form.profilePicture.trim(),
     })
     navigate('/', { replace: true })
   }
@@ -44,11 +57,41 @@ export default function Profile() {
       <div className="mx-auto max-w-xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-card sm:p-8">
           <div className="flex flex-col items-center text-center">
-            <img
-              src={saved.avatar}
-              alt=""
-              className="h-24 w-24 rounded-full object-cover ring-4 ring-brand-soft"
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              className="group relative block h-24 w-24 overflow-hidden rounded-full bg-brand-soft ring-4 ring-brand-soft"
+              aria-label="Change profile picture"
+            >
+              {form.profilePicture ? (
+                <img
+                  src={form.profilePicture}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="grid h-full place-items-center text-brand">
+                  <Camera className="h-7 w-7" />
+                </span>
+              )}
+              <span className="absolute inset-0 grid place-items-center bg-slate-900/0 transition group-hover:bg-slate-900/40">
+                <Camera className="h-5 w-5 text-white opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100" />
+              </span>
+            </button>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                readImageFile(file, (dataUrl) => set('profilePicture', dataUrl))
+                e.target.value = ''
+              }}
             />
+            <p className="mt-2 text-xs font-semibold text-slate-400">
+              Tap the photo to upload a new profile picture
+            </p>
             <h1 className="mt-4 font-display text-2xl font-extrabold text-slate-900">My Profile</h1>
             <p className="mt-1 text-sm text-slate-500">Update your basic account details.</p>
           </div>
