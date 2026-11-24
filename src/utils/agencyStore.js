@@ -1,13 +1,41 @@
 import { useSyncExternalStore } from 'react'
-import { featuredAgents } from '../data/agents'
+import { AGENCY_SERVICES, featuredAgents } from '../data/agents'
 import { freshProperties } from '../data/properties'
 import { featuredPlots } from '../data/plots'
 import { bookingProjects } from '../data/projects'
-import { DEMO_AGENCY_ID } from './session'
+
+/** Keep in sync with session.DEMO_AGENCY_ID — avoid circular import with session.js */
+const DEMO_AGENCY_ID = 'ag-001'
 
 const PROFILE_KEY = 'makan-agency-profiles-v1'
 const LISTINGS_KEY = 'makan-agency-listings-v1'
 const listeners = new Set()
+
+/** Empty shell for real Google agency accounts (no demo/fake field values). */
+function getBlankAgencyProfile(agencyId) {
+  return {
+    id: agencyId,
+    name: '',
+    agency: '',
+    city: '',
+    phone: '',
+    whatsapp: '',
+    email: '',
+    officeAddress: '',
+    bio: '',
+    avatar: '',
+    profilePicture: '',
+    coverImage: '',
+    licenseNumber: '',
+    responseTime: '',
+    experienceYears: '',
+    teamSize: '',
+    specializations: [],
+    areasServed: [],
+    services: [],
+    isProfileCompleted: false,
+  }
+}
 
 function emit() {
   listeners.forEach((listener) => listener())
@@ -43,12 +71,65 @@ function getSnapshot() {
   return `${localStorage.getItem(PROFILE_KEY) || ''}|${localStorage.getItem(LISTINGS_KEY) || ''}`
 }
 
-/** Merge base agent with any agency-panel overrides. */
+/** Merge catalog agent (demo ids only) or blank profile with local overrides. */
 export function getAgencyProfile(agencyId = DEMO_AGENCY_ID) {
   const base = featuredAgents.find((agent) => agent.id === agencyId)
-  if (!base) return null
+  const foundation = base
+    ? {
+        ...base,
+        whatsapp: base.whatsapp || base.phone || '',
+        profilePicture: base.profilePicture || base.avatar || '',
+        avatar: base.avatar || base.profilePicture || '',
+        services: base.services?.length ? [...base.services] : [...AGENCY_SERVICES],
+      }
+    : getBlankAgencyProfile(agencyId)
   const overrides = readJson(PROFILE_KEY, {})
-  return { ...base, ...(overrides[agencyId] || {}) }
+  const merged = { ...foundation, ...(overrides[agencyId] || {}), id: agencyId }
+  const picture = merged.profilePicture || merged.avatar || ''
+  return {
+    ...merged,
+    profilePicture: picture,
+    avatar: picture || '',
+  }
+}
+
+/** Persist Google/sign-in account fields into local agency profile storage. */
+export function syncAgencyProfileFromAccount(agencyId, account = {}) {
+  if (!agencyId) return getAgencyProfile(agencyId)
+  const patch = {
+    isProfileCompleted: Boolean(account.isProfileCompleted),
+  }
+  if (account.name) patch.name = account.name
+  if (account.agency) patch.agency = account.agency
+  if (account.email) patch.email = account.email
+  if (account.city) patch.city = account.city
+  if (account.phone) patch.phone = account.phone
+  if (account.whatsapp) patch.whatsapp = account.whatsapp
+  if (account.officeAddress) patch.officeAddress = account.officeAddress
+  if (account.bio) patch.bio = account.bio
+  if (account.licenseNumber) patch.licenseNumber = account.licenseNumber
+  if (account.responseTime) patch.responseTime = account.responseTime
+  if (account.coverImage) patch.coverImage = account.coverImage
+  if (account.experienceYears != null && account.experienceYears !== '') {
+    patch.experienceYears = Number(account.experienceYears) || 0
+  }
+  if (account.teamSize != null && account.teamSize !== '') {
+    patch.teamSize = Number(account.teamSize) || 0
+  }
+  if (Array.isArray(account.specializations) && account.specializations.length) {
+    patch.specializations = [...account.specializations]
+  }
+  if (Array.isArray(account.areasServed) && account.areasServed.length) {
+    patch.areasServed = [...account.areasServed]
+  }
+  if (Array.isArray(account.services) && account.services.length) {
+    patch.services = [...account.services]
+  }
+  if (account.profilePicture) {
+    patch.profilePicture = account.profilePicture
+    patch.avatar = account.profilePicture
+  }
+  return updateAgencyProfile(agencyId, patch)
 }
 
 /** All agents with agency-panel profile overrides applied. */

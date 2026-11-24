@@ -4,21 +4,29 @@ import { CURRENT_USER as DEFAULT_USER } from '../data/siteConfig'
 const STORAGE_KEY = 'makan-current-user-v1'
 const listeners = new Set()
 
+const EMPTY_USER = {
+  id: '',
+  name: '',
+  email: '',
+  phone: '',
+  profilePicture: '',
+  avatar: '',
+  isProfileCompleted: false,
+}
+
 function readRaw() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')
-    if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_USER }
-    const profilePicture =
-      parsed.profilePicture || parsed.avatar || DEFAULT_USER.profilePicture || DEFAULT_USER.avatar
+    if (!parsed || typeof parsed !== 'object') return { ...EMPTY_USER }
+    const profilePicture = parsed.profilePicture || parsed.avatar || ''
     return {
-      ...DEFAULT_USER,
+      ...EMPTY_USER,
       ...parsed,
-      id: DEFAULT_USER.id,
       profilePicture,
       avatar: profilePicture,
     }
   } catch {
-    return { ...DEFAULT_USER }
+    return { ...EMPTY_USER }
   }
 }
 
@@ -28,11 +36,11 @@ function writeRaw(user) {
 }
 
 function getSnapshot() {
-  return localStorage.getItem(STORAGE_KEY) || JSON.stringify(DEFAULT_USER)
+  return localStorage.getItem(STORAGE_KEY) || JSON.stringify(EMPTY_USER)
 }
 
 function getServerSnapshot() {
-  return JSON.stringify(DEFAULT_USER)
+  return JSON.stringify(EMPTY_USER)
 }
 
 function subscribe(listener) {
@@ -51,17 +59,48 @@ export function getCurrentUser() {
   return readRaw()
 }
 
-export function updateCurrentUser(patch) {
+export function syncCurrentUserFromAccount(account = {}) {
+  const profilePicture = account.profilePicture || account.avatar || ''
   const next = {
-    ...readRaw(),
-    ...patch,
-    id: DEFAULT_USER.id,
+    id: account._id ? String(account._id) : '',
+    name: account.fullname || account.name || '',
+    email: account.email || '',
+    phone: account.phoneNumber || account.phone || '',
+    profilePicture,
+    avatar: profilePicture,
+    isProfileCompleted: Boolean(account.isProfileCompleted),
   }
   writeRaw(next)
   return next
+}
+
+export function updateCurrentUser(patch) {
+  const current = readRaw()
+  const profilePicture =
+    patch.profilePicture !== undefined
+      ? patch.profilePicture
+      : patch.avatar !== undefined
+        ? patch.avatar
+        : current.profilePicture
+  const next = {
+    ...current,
+    ...patch,
+    profilePicture,
+    avatar: profilePicture,
+  }
+  writeRaw(next)
+  return next
+}
+
+export function clearCurrentUser() {
+  localStorage.removeItem(STORAGE_KEY)
+  listeners.forEach((listener) => listener())
 }
 
 export function useCurrentUser() {
   useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   return readRaw()
 }
+
+// Keep DEFAULT_USER available for any legacy demo fallbacks
+export { DEFAULT_USER }

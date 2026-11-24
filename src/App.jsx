@@ -45,9 +45,9 @@ import AgencyDealForm from './pages/agency/AgencyDealForm'
 import LawyerProfile from './pages/lawyer/LawyerProfile'
 import {
   clearSession,
-  enterAsAgency,
-  enterAsLawyer,
-  enterAsUser,
+  getSession,
+  isAgencyProfileCompleted,
+  isUserProfileCompleted,
   useSession,
 } from './utils/session'
 import {
@@ -70,6 +70,10 @@ export default function App() {
   const isAgency = session.role === 'agency'
   const isLawyer = session.role === 'lawyer'
   const isUser = session.role === 'user'
+  const profileCompleted = isUserProfileCompleted(session)
+  const agencyProfileCompleted = isAgencyProfileCompleted(session)
+  const needsUserProfile = isUser && hasEntered && !profileCompleted
+  const needsAgencyProfile = isAgency && hasEntered && !agencyProfileCompleted
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const [buyerGuideOpen, setBuyerGuideOpen] = useState(false)
@@ -119,12 +123,28 @@ export default function App() {
       setBuyerGuideOpen(false)
       return
     }
+    if (!profileCompleted) {
+      setBuyerGuideOpen(false)
+      return
+    }
     if (consumeBuyerGuideSkipOnce()) {
       setBuyerGuideOpen(false)
       return
     }
     if (isBuyerGuidePending()) setBuyerGuideOpen(true)
-  }, [isUser, hasEntered, pathname])
+  }, [isUser, hasEntered, pathname, profileCompleted])
+
+  useEffect(() => {
+    if (!needsUserProfile) return
+    if (pathname === '/profile') return
+    navigate('/profile', { replace: true })
+  }, [needsUserProfile, pathname, navigate])
+
+  useEffect(() => {
+    if (!needsAgencyProfile) return
+    if (pathname === '/agency/profile') return
+    navigate('/agency/profile', { replace: true })
+  }, [needsAgencyProfile, pathname, navigate])
 
   const handleCloseBuyerGuide = useCallback(() => {
     clearBuyerGuidePending()
@@ -153,30 +173,31 @@ export default function App() {
     navigate('/', { replace: true })
   }
 
-  function handleEnterUser() {
-    enterAsUser()
+  function handleSignedIn(role) {
+    if (role === 'agency') {
+      if (!isAgencyProfileCompleted(getSession())) {
+        navigate('/agency/profile', { replace: true })
+        return
+      }
+      navigate('/agency', { replace: true })
+      return
+    }
+    if (role === 'lawyer') {
+      navigate('/lawyer', { replace: true })
+      return
+    }
+    // User: force profile completion before dashboard
+    if (!isUserProfileCompleted(getSession())) {
+      navigate('/profile', { replace: true })
+      return
+    }
     navigate('/', { replace: true })
-  }
-
-  function handleEnterAgency() {
-    enterAsAgency()
-    navigate('/agency', { replace: true })
-  }
-
-  function handleEnterLawyer() {
-    enterAsLawyer()
-    navigate('/lawyer', { replace: true })
   }
 
   if (isLawyer) {
     return (
       <>
-        <RoleGate
-          open={!hasEntered}
-          onEnterUser={handleEnterUser}
-          onEnterAgency={handleEnterAgency}
-          onEnterLawyer={handleEnterLawyer}
-        />
+        <RoleGate open={!hasEntered} onSignedIn={handleSignedIn} />
         <div className="min-h-screen bg-offwhite">
           <ScrollToTop />
           <Routes>
@@ -191,12 +212,7 @@ export default function App() {
   if (isAgency) {
     return (
       <>
-        <RoleGate
-          open={!hasEntered}
-          onEnterUser={handleEnterUser}
-          onEnterAgency={handleEnterAgency}
-          onEnterLawyer={handleEnterLawyer}
-        />
+        <RoleGate open={!hasEntered} onSignedIn={handleSignedIn} />
         <div className="min-h-screen bg-offwhite">
           <ScrollToTop />
           <Routes>
@@ -225,12 +241,7 @@ export default function App() {
 
   return (
     <>
-      <RoleGate
-        open={!hasEntered}
-        onEnterUser={handleEnterUser}
-        onEnterAgency={handleEnterAgency}
-        onEnterLawyer={handleEnterLawyer}
-      />
+      <RoleGate open={!hasEntered} onSignedIn={handleSignedIn} />
 
       <BuyerGuidePopup open={buyerGuideOpen} onClose={handleCloseBuyerGuide} />
 

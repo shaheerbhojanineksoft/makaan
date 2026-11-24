@@ -160,11 +160,29 @@
   animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes toast-shrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
   .animate-fade-up {
     animation: none;
+  }
+
+  @keyframes toast-shrink {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 100%;
+    }
   }
 }

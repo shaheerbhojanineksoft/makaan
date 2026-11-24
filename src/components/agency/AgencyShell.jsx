@@ -16,7 +16,11 @@ import {
 
 import Logo from '../ui/Logo'
 import { getAgencyProfile, useAgencyStore } from '../../utils/agencyStore'
-import { DEMO_AGENCY_ID, useSession } from '../../utils/session'
+import {
+  DEMO_AGENCY_ID,
+  isAgencyProfileCompleted,
+  useSession,
+} from '../../utils/session'
 
 const NAV = [
   { to: '/agency', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -37,7 +41,8 @@ function linkClass({ isActive }) {
   }`
 }
 
-function SideNav({ profile, onNavigate, onSignOut, showLogo = true }) {
+function SideNav({ profile, onNavigate, onSignOut, showLogo = true, items = NAV }) {
+  const avatarSrc = profile?.avatar || profile?.profilePicture || ''
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
       {showLogo ? (
@@ -47,19 +52,29 @@ function SideNav({ profile, onNavigate, onSignOut, showLogo = true }) {
       ) : null}
 
       <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-4">
-        <img
-          src={profile?.avatar}
-          alt=""
-          className="h-11 w-11 rounded-full object-cover ring-2 ring-brand/15"
-        />
+        {avatarSrc ? (
+          <img
+            src={avatarSrc}
+            alt=""
+            className="h-11 w-11 rounded-full object-cover ring-2 ring-brand/15"
+          />
+        ) : (
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-brand-soft text-brand ring-2 ring-brand/15">
+            <Building2 className="h-5 w-5" />
+          </span>
+        )}
         <div className="min-w-0">
-          <p className="truncate text-sm font-extrabold text-slate-900">{profile?.agency}</p>
-          <p className="truncate text-[11px] font-medium text-slate-500">{profile?.name}</p>
+          <p className="truncate text-sm font-extrabold text-slate-900">
+            {profile?.agency || 'Your agency'}
+          </p>
+          <p className="truncate text-[11px] font-medium text-slate-500">
+            {profile?.name || 'Complete profile'}
+          </p>
         </div>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {NAV.map(({ to, label, icon: Icon, end }) => (
+        {items.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
@@ -94,7 +109,12 @@ export default function AgencyShell({ onSignOut }) {
   const session = useSession()
   const agencyId = session.agencyId || DEMO_AGENCY_ID
   const profile = getAgencyProfile(agencyId)
+  const profileCompleted = isAgencyProfileCompleted(session)
+  const navItems = profileCompleted
+    ? NAV
+    : NAV.filter((item) => item.to === '/agency/profile')
   const [menuOpen, setMenuOpen] = useState(false)
+  const avatarSrc = profile?.avatar || profile?.profilePicture || ''
 
   useEffect(() => {
     setMenuOpen(false)
@@ -120,21 +140,31 @@ export default function AgencyShell({ onSignOut }) {
     <div className="min-h-screen bg-offwhite lg:flex">
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-slate-200/80 bg-white lg:flex">
-        <SideNav profile={profile} onSignOut={handleSignOut} />
+        <SideNav profile={profile} onSignOut={handleSignOut} items={navItems} />
       </aside>
 
       {/* Mobile top bar */}
       <div className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md lg:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2.5">
-            <img
-              src={profile?.avatar}
-              alt=""
-              className="h-9 w-9 rounded-full object-cover ring-2 ring-brand/15"
-            />
+            {avatarSrc ? (
+              <img
+                src={avatarSrc}
+                alt=""
+                className="h-9 w-9 rounded-full object-cover ring-2 ring-brand/15"
+              />
+            ) : (
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-soft text-brand ring-2 ring-brand/15">
+                <Building2 className="h-4 w-4" />
+              </span>
+            )}
             <div className="min-w-0">
-              <p className="truncate text-sm font-extrabold text-slate-900">{profile?.agency}</p>
-              <p className="truncate text-[11px] font-medium text-slate-500">Agency panel</p>
+              <p className="truncate text-sm font-extrabold text-slate-900">
+                {profile?.agency || 'Your agency'}
+              </p>
+              <p className="truncate text-[11px] font-medium text-slate-500">
+                {profileCompleted ? 'Agency panel' : 'Complete profile'}
+              </p>
             </div>
           </div>
           <button
@@ -172,6 +202,7 @@ export default function AgencyShell({ onSignOut }) {
             <SideNav
               profile={profile}
               showLogo={false}
+              items={navItems}
               onNavigate={() => setMenuOpen(false)}
               onSignOut={handleSignOut}
             />

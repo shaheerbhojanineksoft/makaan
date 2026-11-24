@@ -1,12 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { Eye, Headphones, PlusCircle, X } from 'lucide-react'
+import {
+  Clock3,
+  Eye,
+  Hash,
+  Headphones,
+  ImageOff,
+  MessageSquareText,
+  Phone,
+  PlusCircle,
+  RefreshCw,
+  Tag,
+  X,
+} from 'lucide-react'
 
 import Badge from '../../components/ui/Badge'
+import { webApi } from '../../utils/api'
 import AgencyHelpSupportForm from './AgencyHelpSupportForm'
 import {
   SUPPORT_STATUSES,
   getSupportRequests,
+  replaceSupportRequests,
   useSupportRequestsStore,
 } from '../../utils/supportRequestsStore'
 
@@ -31,12 +45,15 @@ function formatDateTime(value) {
   }
 }
 
-function DetailItem({ label, value }) {
+function MetaChip({ icon: Icon, label, value }) {
   if (value == null || value === '') return null
   return (
-    <div>
-      <p className="text-[11px] font-bold tracking-wide text-slate-400 uppercase">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-800 whitespace-pre-wrap">{value}</p>
+    <div className="rounded-2xl border border-white/70 bg-white/80 px-3.5 py-3 shadow-sm backdrop-blur-sm">
+      <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wide text-slate-400 uppercase">
+        {Icon ? <Icon className="h-3.5 w-3.5 text-brand" /> : null}
+        {label}
+      </div>
+      <p className="mt-1.5 text-sm font-bold break-all text-slate-800">{value}</p>
     </div>
   )
 }
@@ -56,7 +73,10 @@ function RequestDetailModal({ request, onClose }) {
     }
   }, [onClose])
 
-  const attachments = Array.isArray(request.attachments) ? request.attachments.filter(Boolean) : []
+  const attachments = Array.isArray(request.attachments)
+    ? request.attachments.filter(Boolean)
+    : []
+  const waiting = !request.response
 
   return (
     <div
@@ -73,75 +93,115 @@ function RequestDetailModal({ request, onClose }) {
       />
 
       <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
-          <div className="min-w-0">
-            <p className="text-[11px] font-extrabold tracking-[0.14em] text-brand uppercase">
-              {request.topic || 'Support'}
-            </p>
-            <h2
-              id="support-request-title"
-              className="mt-1 font-display text-2xl font-extrabold text-slate-900"
-            >
-              {request.subject}
-            </h2>
-            <div className="mt-3">
-              <Badge variant={STATUS_VARIANT[request.status] || 'green'}>
-                {SUPPORT_STATUSES[request.status] || request.status}
-              </Badge>
+        <div className="relative overflow-hidden border-b border-brand/10 bg-gradient-to-br from-brand-soft via-white to-emerald-50/40 px-5 py-6 sm:px-7">
+          <div className="pointer-events-none absolute -top-10 -right-8 h-36 w-36 rounded-full bg-brand/10 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-12 left-8 h-28 w-28 rounded-full bg-emerald-200/30 blur-2xl" />
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[11px] font-extrabold tracking-[0.16em] text-brand uppercase">
+                  Help & support
+                </p>
+                <Badge variant={STATUS_VARIANT[request.status] || 'green'}>
+                  {SUPPORT_STATUSES[request.status] || request.status}
+                </Badge>
+              </div>
+              <h2
+                id="support-request-title"
+                className="mt-3 font-display text-2xl font-extrabold leading-tight text-slate-900 sm:text-[1.75rem]"
+              >
+                {request.subject}
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Submitted {formatDateTime(request.createdAt)}
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/50 bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-brand"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50 hover:text-brand"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
-        <div className="space-y-5 p-5 sm:p-6">
-          <div className="grid gap-4 rounded-xl border border-slate-100 bg-slate-50/80 p-4 sm:grid-cols-2">
-            <DetailItem label="Request ID" value={request.id} />
-            <DetailItem label="Related ID" value={request.relatedId || '—'} />
-            <DetailItem label="Phone" value={request.phone} />
-            <DetailItem label="Submitted" value={formatDateTime(request.createdAt)} />
-            <DetailItem label="Last updated" value={formatDateTime(request.updatedAt)} />
+        <div className="space-y-5 p-5 sm:p-7">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <MetaChip icon={Tag} label="Topic" value={request.topic} />
+            <MetaChip icon={Phone} label="Phone" value={request.phone} />
+            <MetaChip icon={Hash} label="Request ID" value={request._id} />
+            <MetaChip icon={Clock3} label="Submitted" value={formatDateTime(request.createdAt)} />
+            <MetaChip
+              icon={RefreshCw}
+              label="Last updated"
+              value={formatDateTime(request.updatedAt)}
+            />
           </div>
 
-          <DetailItem label="Your message" value={request.message} />
-
-          {attachments.length ? (
-            <div>
-              <p className="text-[11px] font-bold tracking-wide text-slate-400 uppercase">
-                Attachments
+          <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/80 px-4 py-3">
+              <MessageSquareText className="h-4 w-4 text-brand" />
+              <p className="text-[11px] font-extrabold tracking-wide text-slate-500 uppercase">
+                Your message
               </p>
-              <div className="mt-2 grid grid-cols-2 gap-3 sm:max-w-md">
+            </div>
+            <div className="border-l-4 border-brand/70 px-4 py-4 sm:px-5">
+              <p className="text-sm font-semibold leading-relaxed whitespace-pre-wrap text-slate-800">
+                {request.message || '—'}
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <p className="text-[11px] font-extrabold tracking-wide text-slate-500 uppercase">
+              Attachments
+            </p>
+            {attachments.length ? (
+              <div className="mt-3 grid grid-cols-2 gap-3">
                 {attachments.map((url, index) => (
-                  <img
+                  <a
                     key={`${url.slice(0, 40)}-${index}`}
-                    src={url}
-                    alt=""
-                    className="aspect-[4/3] w-full rounded-xl object-cover border border-slate-200"
-                  />
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                    />
+                  </a>
                 ))}
               </div>
-            </div>
-          ) : null}
+            ) : (
+              <div className="mt-3 flex items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-500">
+                <ImageOff className="h-4 w-4" />
+                No pictures attached.
+              </div>
+            )}
+          </section>
 
-          {request.response ? (
-            <div className="rounded-xl border border-brand/15 bg-brand-soft/50 p-4">
-              <p className="text-[11px] font-bold tracking-wide text-brand uppercase">
-                Admin response
+          {waiting ? (
+            <div className="rounded-2xl border border-amber-200/80 bg-amber-50/70 px-4 py-4">
+              <p className="text-[11px] font-extrabold tracking-wide text-amber-700 uppercase">
+                Awaiting reply
               </p>
-              <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-800 whitespace-pre-wrap">
-                {request.response}
+              <p className="mt-2 text-sm font-semibold leading-relaxed text-amber-900/80">
+                No response yet — our Makaan team will update this request once it’s reviewed.
               </p>
             </div>
           ) : (
-            <p className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-              No response yet — our team will update this request once it’s reviewed.
-            </p>
+            <section className="rounded-2xl border border-brand/20 bg-gradient-to-br from-brand-soft/80 via-white to-white p-4 sm:p-5">
+              <p className="text-[11px] font-extrabold tracking-wide text-brand uppercase">
+                Admin response
+              </p>
+              <p className="mt-3 text-sm font-semibold leading-relaxed whitespace-pre-wrap text-slate-800">
+                {request.response}
+              </p>
+            </section>
           )}
         </div>
       </div>
@@ -154,6 +214,25 @@ export default function AgencyHelpSupport() {
   const storeTick = useSupportRequestsStore()
   const [selected, setSelected] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [loadingList, setLoadingList] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      setLoadingList(true)
+      try {
+        const rows = await webApi('/support/requests', { auth: true })
+        if (!cancelled) replaceSupportRequests(agencyId, Array.isArray(rows) ? rows : [])
+      } catch {
+        // Keep local/demo cache if API is unavailable
+      } finally {
+        if (!cancelled) setLoadingList(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [agencyId])
 
   const requests = useMemo(() => getSupportRequests(agencyId), [agencyId, storeTick])
 
@@ -166,7 +245,12 @@ export default function AgencyHelpSupport() {
   }, [requests])
 
   if (showForm) {
-    return <AgencyHelpSupportForm onBack={() => setShowForm(false)} />
+    return (
+      <AgencyHelpSupportForm
+        onBack={() => setShowForm(false)}
+        onCreated={() => setShowForm(false)}
+      />
+    )
   }
 
   return (
@@ -222,7 +306,11 @@ export default function AgencyHelpSupport() {
       </section>
 
       <div className="space-y-3 md:hidden">
-        {requests.length === 0 ? (
+        {loadingList ? (
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-10 text-center text-sm font-semibold text-slate-500">
+            Loading requests…
+          </div>
+        ) : requests.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-10 text-center">
             <p className="font-semibold text-slate-700">No support requests yet</p>
             <p className="mt-1 text-sm text-slate-500">
@@ -240,7 +328,7 @@ export default function AgencyHelpSupport() {
         ) : (
           requests.map((row) => (
             <article
-              key={row.id}
+              key={row._id}
               className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm"
             >
               <div className="space-y-2 p-4">
@@ -250,9 +338,6 @@ export default function AgencyHelpSupport() {
                     {SUPPORT_STATUSES[row.status] || row.status}
                   </Badge>
                 </div>
-                {row.relatedId ? (
-                  <p className="text-xs text-slate-500">Ref: {row.relatedId}</p>
-                ) : null}
                 <p className="text-sm text-slate-600">{row.topic || '—'}</p>
                 <p className="text-xs text-slate-500">{formatDateTime(row.createdAt)}</p>
               </div>
@@ -284,7 +369,13 @@ export default function AgencyHelpSupport() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {requests.length === 0 ? (
+              {loadingList ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm font-semibold text-slate-500">
+                    Loading requests…
+                  </td>
+                </tr>
+              ) : requests.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-12 text-center">
                     <p className="font-semibold text-slate-700">No support requests yet</p>
@@ -303,12 +394,9 @@ export default function AgencyHelpSupport() {
                 </tr>
               ) : (
                 requests.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50/80">
+                  <tr key={row._id} className="hover:bg-slate-50/80">
                     <td className="px-4 py-3">
                       <p className="font-bold text-slate-900">{row.subject}</p>
-                      {row.relatedId ? (
-                        <p className="mt-0.5 text-xs text-slate-500">Ref: {row.relatedId}</p>
-                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-slate-600">{row.topic || '—'}</td>
                     <td className="px-4 py-3">

@@ -1,11 +1,20 @@
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Camera, Mail, Phone, UserRound } from 'lucide-react'
 
-import { updateCurrentUser, useCurrentUser } from '../utils/currentUser'
+import Toast from '../components/ui/Toast'
+import { webApi } from '../utils/api'
+import {
+  getSession,
+  isUserProfileCompleted,
+  updateSessionAccount,
+  useSession,
+} from '../utils/session'
 
 const FIELD_CLASS =
   'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:font-medium placeholder:text-slate-400 focus:border-brand/40 focus:ring-2 focus:ring-brand/15'
+
+const PHONE_PATTERN = /^\+?[0-9][0-9\s\-()]*[0-9]$/
 
 function Field({ label, htmlFor, children }) {
   return (
@@ -16,44 +25,143 @@ function Field({ label, htmlFor, children }) {
   )
 }
 
-function readImageFile(file, onReady) {
+function displayOrDash(value) {
+  const text = (value ?? '').toString().trim()
+  return text || '-'
+}
+
+function fromFormValue(value) {
+  const text = (value ?? '').toString().trim()
+  if (!text || text === '-') return ''
+  return text
+}
+
+function sanitizePhoneInput(value) {
+  return value.replace(/[^\d+\-\s()]/g, '')
+}
+
+function isValidPhone(value) {
+  const phone = fromFormValue(value)
+  if (!phone || !PHONE_PATTERN.test(phone)) return false
+  const digits = phone.replace(/\D/g, '')
+  return digits.length >= 10 && digits.length <= 15
+}
+
+function buildForm(account = {}) {
+  return {
+    name: displayOrDash(account.fullname || account.name),
+    email: displayOrDash(account.email),
+    phone: displayOrDash(account.phoneNumber || account.phone),
+    profilePicture: (account.profilePicture || account.avatar || '').trim(),
+  }
+}
+
+function compressImageFile(file, onReady) {
   if (!file || !file.type.startsWith('image/')) return
   const reader = new FileReader()
   reader.onload = () => {
-    if (typeof reader.result === 'string') onReady(reader.result)
+    if (typeof reader.result !== 'string') return
+    const img = new Image()
+    img.onload = () => {
+      const maxSize = 512
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height))
+      const width = Math.max(1, Math.round(img.width * scale))
+      const height = Math.max(1, Math.round(img.height * scale))
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        onReady(reader.result)
+        return
+      }
+      ctx.drawImage(img, 0, 0, width, height)
+      onReady(canvas.toDataURL('image/jpeg', 0.72))
+    }
+    img.onerror = () => onReady(reader.result)
+    img.src = reader.result
   }
   reader.readAsDataURL(file)
 }
 
 export default function Profile() {
   const navigate = useNavigate()
-  const saved = useCurrentUser()
+  const session = useSession()
   const photoInputRef = useRef(null)
-  const [form, setForm] = useState({
-    name: saved.name || '',
-    email: saved.email || '',
-    phone: saved.phone || '',
-    profilePicture: saved.profilePicture || saved.avatar || '',
-  })
+  const [form, setForm] = useState(() => buildForm(session.account))
+  const [loading, setLoading] = useState(false)
+  const [toast, setToast] = useState('')
+  const [toastVariant, setToastVariant] = useState('error')
+
+  const clearToast = useCallback(() => setToast(''), [])
+  const accountKey = JSON.stringify(session.account || {})
+
+  useEffect(() => {
+    setForm(buildForm(JSON.parse(accountKey)))
+  }, [accountKey])
 
   function set(key, value) {
     setForm((current) => ({ ...current, [key]: value }))
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    updateCurrentUser({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      profilePicture: form.profilePicture.trim(),
-      avatar: form.profilePicture.trim(),
-    })
-    navigate('/', { replace: true })
+
+    const payload = {
+      name: fromFormValue(form.name),
+      phone: fromFormValue(form.phone),
+      profilePicture: fromFormValue(form.profilePicture),
+      isProfileCompleted: true,
+    }
+
+    if (!payload.name || !payload.phone) {
+      setToastVariant('error')
+      setToast('Name and phone are required.')
+      return
+    }
+
+    if (!isValidPhone(payload.phone)) {
+      setToastVariant('error')
+      setToast('Enter a valid phone number (digits only).')
+      return
+    }
+
+    setLoading(true)
+    setToast('')
+
+    try {
+      const updated = await webApi('/profile/user', {
+        method: 'PATCH',
+        auth: true,
+        body: JSON.stringify(payload),
+      })
+      updateSessionAccount(updated || { ...session.account, ...payload, fullname: payload.name, phoneNumber: payload.phone })
+      setToastVariant('success')
+      setToast('Profile updated successfully.')
+      window.setTimeout(() => {
+        navigate('/', { replace: true })
+      }, 600)
+    } catch (err) {
+      setToastVariant('error')
+      setToast(err?.message || 'Failed to update profile.')
+    } finally {
+      setLoading(false)
+    }
   }
+
+  const forcingCompletion =
+    session.role === 'user' && !isUserProfileCompleted(getSession())
 
   return (
     <section className="bg-offwhite py-12 sm:py-16">
+      <Toast
+        open={Boolean(toast)}
+        message={toast}
+        variant={toastVariant}
+        duration={3000}
+        onClose={clearToast}
+      />
+
       <div className="mx-auto max-w-xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-card sm:p-8">
           <div className="flex flex-col items-center text-center">
@@ -63,7 +171,7 @@ export default function Profile() {
               className="group relative block h-24 w-24 overflow-hidden rounded-full bg-brand-soft ring-4 ring-brand-soft"
               aria-label="Change profile picture"
             >
-              {form.profilePicture ? (
+              {form.profilePicture && form.profilePicture !== '-' ? (
                 <img
                   src={form.profilePicture}
                   alt=""
@@ -71,11 +179,11 @@ export default function Profile() {
                 />
               ) : (
                 <span className="grid h-full place-items-center text-brand">
-                  <Camera className="h-7 w-7" />
+                  <UserRound className="h-8 w-8" />
                 </span>
               )}
-              <span className="absolute inset-0 grid place-items-center bg-slate-900/0 transition group-hover:bg-slate-900/40">
-                <Camera className="h-5 w-5 text-white opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100" />
+              <span className="absolute inset-0 grid place-items-center bg-slate-900/0 opacity-0 transition group-hover:bg-slate-900/40 group-hover:opacity-100">
+                <Camera className="h-5 w-5 text-white" />
               </span>
             </button>
             <input
@@ -85,15 +193,21 @@ export default function Profile() {
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0]
-                readImageFile(file, (dataUrl) => set('profilePicture', dataUrl))
+                compressImageFile(file, (dataUrl) => set('profilePicture', dataUrl))
                 e.target.value = ''
               }}
             />
             <p className="mt-2 text-xs font-semibold text-slate-400">
               Tap the photo to upload a new profile picture
             </p>
-            <h1 className="mt-4 font-display text-2xl font-extrabold text-slate-900">My Profile</h1>
-            <p className="mt-1 text-sm text-slate-500">Update your basic account details.</p>
+            <h1 className="mt-4 font-display text-2xl font-extrabold text-slate-900">
+              {forcingCompletion ? 'Complete your profile' : 'My Profile'}
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              {forcingCompletion
+                ? 'Fill your details once before using Makaan.'
+                : 'Update your basic account details.'}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -124,11 +238,10 @@ export default function Profile() {
                 <input
                   id="profile-email"
                   type="email"
-                  required
                   value={form.email}
-                  onChange={(event) => set('email', event.target.value)}
-                  className={`${FIELD_CLASS} pl-10`}
-                  placeholder="you@example.com"
+                  disabled
+                  readOnly
+                  className={`${FIELD_CLASS} cursor-not-allowed bg-slate-50 pl-10 text-slate-500`}
                 />
               </div>
             </Field>
@@ -142,20 +255,22 @@ export default function Profile() {
                 <input
                   id="profile-phone"
                   type="tel"
+                  inputMode="tel"
                   required
                   value={form.phone}
-                  onChange={(event) => set('phone', event.target.value)}
+                  onChange={(event) => set('phone', sanitizePhoneInput(event.target.value))}
                   className={`${FIELD_CLASS} pl-10`}
-                  placeholder="+92 300 1234567"
+                  placeholder="03XXXXXXXXX"
                 />
               </div>
             </Field>
 
             <button
               type="submit"
-              className="mt-2 w-full rounded-xl bg-brand px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark"
+              disabled={loading || Boolean(toast)}
+              className="mt-2 w-full rounded-xl bg-brand px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Update
+              {loading ? 'Updating…' : 'Update'}
             </button>
           </form>
         </div>

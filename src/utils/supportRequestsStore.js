@@ -44,59 +44,6 @@ function getSnapshot() {
   return localStorage.getItem(STORAGE_KEY) || ''
 }
 
-function seedForAgency(agencyId) {
-  const now = Date.now()
-  return [
-    {
-      id: `sup-${agencyId}-001`,
-      agencyId,
-      subject: 'Listing stuck in draft after publish',
-      topic: 'Publishing / draft',
-      relatedId: 'prop-012',
-      message:
-        'Tried publishing a villa listing twice. Status stays on draft and the public site never shows it.',
-      attachments: [],
-      phone: '+92 300 1234567',
-      status: 'in_review',
-      response:
-        'We are checking your listing publish queue. Expect an update within 2 working hours.',
-      createdAt: new Date(now - 1000 * 60 * 60 * 26).toISOString(),
-      updatedAt: new Date(now - 1000 * 60 * 60 * 4).toISOString(),
-    },
-    {
-      id: `sup-${agencyId}-002`,
-      agencyId,
-      subject: 'Agency phone number not updating on profile',
-      topic: 'Profile / account',
-      relatedId: '',
-      message:
-        'Updated our contact number in Profile Edit, but the public agent page still shows the old WhatsApp number.',
-      attachments: [],
-      phone: '+92 321 9876543',
-      status: 'responded',
-      response:
-        'Profile cache was cleared. Please hard-refresh the agent page — your new number should appear now.',
-      createdAt: new Date(now - 1000 * 60 * 60 * 72).toISOString(),
-      updatedAt: new Date(now - 1000 * 60 * 60 * 48).toISOString(),
-    },
-    {
-      id: `sup-${agencyId}-003`,
-      agencyId,
-      subject: 'Need help editing a recommendation',
-      topic: 'Recommendations',
-      relatedId: 'rec-101',
-      message:
-        'Our recommendation was published but we need to correct the possession timeline. Edit is locked.',
-      attachments: [],
-      phone: '+92 300 1234567',
-      status: 'pending',
-      response: '',
-      createdAt: new Date(now - 1000 * 60 * 60 * 3).toISOString(),
-      updatedAt: new Date(now - 1000 * 60 * 60 * 3).toISOString(),
-    },
-  ]
-}
-
 function readAll() {
   return readJson(STORAGE_KEY, {})
 }
@@ -104,10 +51,9 @@ function readAll() {
 function ensureAgencyRequests(agencyId) {
   const all = readAll()
   if (Array.isArray(all[agencyId])) return all[agencyId]
-  const seeded = seedForAgency(agencyId)
-  all[agencyId] = seeded
+  all[agencyId] = []
   writeJson(STORAGE_KEY, all)
-  return seeded
+  return all[agencyId]
 }
 
 export function getSupportRequests(agencyId = DEMO_AGENCY_ID) {
@@ -116,7 +62,7 @@ export function getSupportRequests(agencyId = DEMO_AGENCY_ID) {
 }
 
 export function getSupportRequest(agencyId, id) {
-  return getSupportRequests(agencyId).find((item) => item.id === id) || null
+  return getSupportRequests(agencyId).find((item) => item._id === id) || null
 }
 
 export function createSupportRequest(agencyId, payload) {
@@ -124,22 +70,28 @@ export function createSupportRequest(agencyId, payload) {
   const list = ensureAgencyRequests(agencyId)
   const now = new Date().toISOString()
   const next = {
-    id: `sup-${agencyId}-${Date.now()}`,
-    agencyId,
+    _id: payload._id || `local-${agencyId}-${Date.now()}`,
+    agencyId: payload.agencyId || agencyId,
     subject: payload.subject?.trim() || 'Untitled request',
     topic: payload.topic || 'Other',
-    relatedId: payload.relatedId?.trim() || '',
     message: payload.message?.trim() || '',
     attachments: Array.isArray(payload.attachments) ? payload.attachments : [],
     phone: payload.phone?.trim() || '',
-    status: 'pending',
-    response: '',
-    createdAt: now,
-    updatedAt: now,
+    status: payload.status || 'pending',
+    response: payload.response || '',
+    createdAt: payload.createdAt || now,
+    updatedAt: payload.updatedAt || now,
   }
-  all[agencyId] = [next, ...list]
+  all[agencyId] = [next, ...list.filter((item) => item._id !== next._id)]
   writeJson(STORAGE_KEY, all)
   return next
+}
+
+export function replaceSupportRequests(agencyId, rows = []) {
+  const all = readAll()
+  all[agencyId] = Array.isArray(rows) ? rows : []
+  writeJson(STORAGE_KEY, all)
+  return all[agencyId]
 }
 
 export function useSupportRequestsStore() {

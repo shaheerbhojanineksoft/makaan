@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { ArrowLeft, Headphones, ImagePlus, X } from 'lucide-react'
 
+import Toast from '../../components/ui/Toast'
+import { webApi } from '../../utils/api'
 import { createSupportRequest } from '../../utils/supportRequestsStore'
 
 const FIELD =
@@ -27,22 +29,55 @@ function Field({ label, children }) {
   )
 }
 
+const MAX_IMAGE_EDGE = 1280
+const JPEG_QUALITY = 0.72
+
+function compressImageFile(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : ''
+      if (!dataUrl) {
+        resolve('')
+        return
+      }
+      const img = new Image()
+      img.onload = () => {
+        const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(img.width, img.height))
+        const width = Math.max(1, Math.round(img.width * scale))
+        const height = Math.max(1, Math.round(img.height * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          resolve(dataUrl)
+          return
+        }
+        ctx.drawImage(img, 0, 0, width, height)
+        try {
+          resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY))
+        } catch {
+          resolve(dataUrl)
+        }
+      }
+      img.onerror = () => resolve(dataUrl)
+      img.src = dataUrl
+    }
+    reader.onerror = () => resolve('')
+    reader.readAsDataURL(file)
+  })
+}
+
 function readImageFiles(files, onReady, onReject) {
   const incoming = [...files]
   const rejected = incoming.filter((file) => !file.type.startsWith('image/'))
   if (rejected.length) onReject?.('Only pictures are allowed — videos and other files cannot be attached.')
   const list = incoming.filter((file) => file.type.startsWith('image/'))
   if (!list.length) return
-  Promise.all(
-    list.map(
-      (file) =>
-        new Promise((resolve) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '')
-          reader.readAsDataURL(file)
-        }),
-    ),
-  ).then((urls) => onReady(urls.filter(Boolean)))
+  Promise.all(list.map((file) => compressImageFile(file))).then((urls) =>
+    onReady(urls.filter(Boolean)),
+  )
 }
 
 function AttachmentUpload({ images, onChange }) {
@@ -113,18 +148,20 @@ function AttachmentUpload({ images, onChange }) {
   )
 }
 
-export default function AgencyHelpSupportForm({ onBack }) {
+export default function AgencyHelpSupportForm({ onBack, onCreated }) {
   const navigate = useNavigate()
   const { agencyId, profile } = useOutletContext()
   const [form, setForm] = useState({
     subject: '',
     topic: '',
-    relatedId: '',
     message: '',
     attachments: [],
     phone: profile?.phone || '',
   })
-  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [toast, setToast] = useState('')
+  const [toastVariant, setToastVariant] = useState('error')
+  const clearToast = useCallback(() => setToast(''), [])
 
   function goBack() {
     if (onBack) onBack()
@@ -133,18 +170,69 @@ export default function AgencyHelpSupportForm({ onBack }) {
 
   function set(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }))
-    setSent(false)
   }
 
-  function handleSubmit(e) {
+  function validateForm() {
+    if (!form.subject.trim()) return 'Subject is required.'
+    if (!form.topic.trim()) return 'Topic is required.'
+    if (!form.message.trim()) return 'Please describe your issue.'
+    if (form.message.trim().length < 10) {
+      return 'Please describe your issue in at least 10 characters.'
+    }
+    if (!form.phone.trim()) return 'Phone number is required.'
+    return null
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault()
-    createSupportRequest(agencyId, form)
-    setSent(true)
-    setTimeout(goBack, 700)
+    if (loading) return
+
+    const errorMessage = validateForm()
+    if (errorMessage) {
+      setToastVariant('error')
+      setToast(errorMessage)
+      return
+    }
+
+    const payload = {
+      subject: form.subject.trim(),
+      topic: form.topic.trim(),
+      message: form.message.trim(),
+      phone: form.phone.trim(),
+    }
+    if (form.attachments.length) payload.attachments = form.attachments
+
+    setLoading(true)
+    setToast('')
+    try {
+      const created = await webApi('/support/requests', {
+        method: 'POST',
+        auth: true,
+        body: JSON.stringify(payload),
+      })
+      // Keep local list in sync for the requests table
+      createSupportRequest(agencyId, created || payload)
+      onCreated?.(created)
+      setToastVariant('success')
+      setToast('Support request submitted.')
+      window.setTimeout(goBack, 700)
+    } catch (error) {
+      setToastVariant('error')
+      setToast(error?.message || 'Could not submit support request.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="space-y-6">
+      <Toast
+        open={Boolean(toast)}
+        message={toast}
+        variant={toastVariant}
+        onClose={clearToast}
+      />
+
       <div>
         <button
           type="button"
@@ -174,14 +262,14 @@ export default function AgencyHelpSupportForm({ onBack }) {
               (9 AM – 6 PM). For urgent listing or account issues we aim to respond even faster.
             </p>
             <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-slate-600">
-              Share your agency name and listing or recommendation ID so we can look up the case quickly.
+              Share clear details about the issue so we can look up the case quickly.
             </p>
           </div>
         </div>
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
-        <form onSubmit={handleSubmit} className="space-y-4 p-5 sm:p-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4 p-5 sm:p-6">
           <p className="text-sm text-slate-500">
             Describe your issue below. Your request will be sent to the Makaan admin team for review.
             {profile?.agency ? (
@@ -193,7 +281,7 @@ export default function AgencyHelpSupportForm({ onBack }) {
           </p>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Subject">
+            <Field label="Subject *">
               <input
                 className={FIELD}
                 value={form.subject}
@@ -202,7 +290,7 @@ export default function AgencyHelpSupportForm({ onBack }) {
                 required
               />
             </Field>
-            <Field label="Topic">
+            <Field label="Topic *">
               <select
                 className={FIELD}
                 value={form.topic}
@@ -221,16 +309,7 @@ export default function AgencyHelpSupportForm({ onBack }) {
             </Field>
           </div>
 
-          <Field label="Listing / recommendation ID (optional)">
-            <input
-              className={FIELD}
-              value={form.relatedId}
-              onChange={(e) => set('relatedId', e.target.value)}
-              placeholder="e.g. prop-012 or rec-101"
-            />
-          </Field>
-
-          <Field label="Describe your issue">
+          <Field label="Describe your issue *">
             <textarea
               className={`${FIELD} min-h-[140px] resize-y`}
               value={form.message}
@@ -245,7 +324,7 @@ export default function AgencyHelpSupportForm({ onBack }) {
             onChange={(attachments) => set('attachments', attachments)}
           />
 
-          <Field label="Phone number">
+          <Field label="Phone number *">
             <input
               className={FIELD}
               type="tel"
@@ -256,25 +335,21 @@ export default function AgencyHelpSupportForm({ onBack }) {
             />
           </Field>
 
-          {sent ? (
-            <p className="rounded-xl bg-brand-soft px-4 py-3 text-sm font-semibold text-brand">
-              Query submitted. Returning to your requests…
-            </p>
-          ) : null}
-
           <div className="flex flex-wrap items-center justify-end gap-3 pt-1">
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
+              disabled={loading}
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:bg-brand-dark"
+              disabled={loading}
+              className="inline-flex items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Submit query
+              {loading ? 'Submitting…' : 'Submit query'}
             </button>
           </div>
         </form>

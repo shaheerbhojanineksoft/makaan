@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Building2, Scale, UserRound } from 'lucide-react'
 
 import Logo from './ui/Logo'
+import Toast from './ui/Toast'
+import { webApi } from '../utils/api'
+import { mountGoogleButton } from '../utils/googleAuth'
+import { enterFromGoogleAuth } from '../utils/session'
 
 const ROLE_OPTIONS = [
   { id: 'user', label: 'Sign in as User', Icon: UserRound },
@@ -9,47 +13,34 @@ const ROLE_OPTIONS = [
   { id: 'lawyer', label: 'Sign in as Lawyer', Icon: Scale },
 ]
 
-function GoogleIcon({ className = 'h-5 w-5' }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-      />
-    </svg>
-  )
-}
-
 /**
  * Full-screen entry gate — pick User, Agency, or Lawyer, then Google sign-in.
  *
  * @param {boolean} open
- * @param {() => void} onEnterUser
- * @param {() => void} onEnterAgency
- * @param {() => void} onEnterLawyer
+ * @param {(role: 'user' | 'agency' | 'lawyer') => void} onSignedIn
  */
-export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawyer }) {
+export default function RoleGate({ open, onSignedIn }) {
   const enterRef = useRef(null)
+  const googleBtnRef = useRef(null)
+  const pathRef = useRef(null)
   /** @type {null | 'user' | 'agency' | 'lawyer'} */
   const [path, setPath] = useState(null)
   const [signingIn, setSigningIn] = useState(false)
+  const [toast, setToast] = useState('')
+  const [googleReady, setGoogleReady] = useState(false)
+
+  const clearToast = useCallback(() => setToast(''), [])
+
+  useEffect(() => {
+    pathRef.current = path
+  }, [path])
 
   useEffect(() => {
     if (!open) {
       setPath(null)
       setSigningIn(false)
+      setToast('')
+      setGoogleReady(false)
       return undefined
     }
 
@@ -66,16 +57,64 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
     }
   }, [open])
 
-  function handleGoogleSignIn() {
-    if (!path || signingIn) return
-    setSigningIn(true)
-    window.setTimeout(() => {
-      setSigningIn(false)
-      if (path === 'user') onEnterUser()
-      else if (path === 'agency') onEnterAgency()
-      else onEnterLawyer?.()
-    }, 700)
-  }
+  useEffect(() => {
+    if (!open || !path || !googleBtnRef.current) {
+      setGoogleReady(false)
+      return undefined
+    }
+
+    let cancelled = false
+    setGoogleReady(false)
+    setToast('')
+
+    ;(async () => {
+      try {
+        await mountGoogleButton(googleBtnRef.current, {
+          onCredential: async (idToken) => {
+            const type = pathRef.current
+            if (!type || signingIn) return
+
+            setSigningIn(true)
+            setToast('')
+            try {
+              const data = await webApi('/auth/google', {
+                method: 'POST',
+                body: JSON.stringify({ idToken, type }),
+              })
+              const role = enterFromGoogleAuth(data)
+              onSignedIn?.(role)
+            } catch (err) {
+              setToast(err?.message || 'Google sign-in failed. Please try again.')
+            } finally {
+              setSigningIn(false)
+            }
+          },
+          onError: (err) => {
+            setToast(err?.message || 'Google sign-in failed.')
+          },
+        })
+        if (!cancelled) setGoogleReady(true)
+      } catch (err) {
+        if (!cancelled) {
+          const message = err?.message || 'Google Sign-In failed to load'
+          // Common local-dev cause of 403
+          if (/403|origin/i.test(message)) {
+            setToast(
+              `Google blocked this origin (${window.location.origin}). Add it in Google Cloud → Credentials → Authorized JavaScript origins.`,
+            )
+          } else {
+            setToast(message)
+          }
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      if (googleBtnRef.current) googleBtnRef.current.innerHTML = ''
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, path, onSignedIn])
 
   if (!open) return null
 
@@ -107,6 +146,14 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
       data-role-gate
       className="fixed inset-0 z-[100] flex flex-col justify-center overflow-y-auto overscroll-contain bg-brand/85 px-4 py-6 backdrop-blur-xl sm:px-6 sm:py-8"
     >
+      <Toast
+        open={Boolean(toast)}
+        message={toast}
+        variant="error"
+        duration={4000}
+        onClose={clearToast}
+      />
+
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-brand-light/25 blur-3xl" />
         <div className="absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
@@ -173,39 +220,40 @@ export default function RoleGate({ open, onEnterUser, onEnterAgency, onEnterLawy
                   : 'Lawyer account path'}
             </div>
 
-            <button
-              ref={enterRef}
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={signingIn}
-              className="inline-flex w-full max-w-sm items-center justify-center gap-3 rounded-2xl bg-white px-5 py-4 text-sm font-bold text-slate-800 shadow-xl shadow-brand-dark/25 transition hover:-translate-y-0.5 hover:shadow-2xl disabled:cursor-wait disabled:opacity-80 sm:max-w-none sm:min-w-[300px] sm:px-6 sm:text-base"
-            >
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white ring-1 ring-slate-200">
-                <GoogleIcon className="h-5 w-5" />
-              </span>
-              <span className="text-left leading-snug">
+            <div className="w-full max-w-sm rounded-2xl bg-white p-4 shadow-xl shadow-brand-dark/25 sm:max-w-md">
+              <p className="mb-3 text-center text-xs font-semibold text-slate-500">
                 {signingIn
-                  ? 'Signing in…'
-                  : isUserPath
-                    ? 'Continue with Google as User'
-                    : isAgencyPath
-                      ? 'Continue with Google as Agency'
-                      : 'Continue with Google as Lawyer'}
-              </span>
-            </button>
+                  ? 'Signing in with Makaan…'
+                  : googleReady
+                    ? `Continue with Google as ${isUserPath ? 'User' : isAgencyPath ? 'Agency' : 'Lawyer'}`
+                    : 'Loading Google…'}
+              </p>
+              <div
+                ref={googleBtnRef}
+                className={`flex min-h-[44px] items-center justify-center ${
+                  signingIn || toast ? 'pointer-events-none opacity-60' : ''
+                }`}
+              />
+            </div>
 
             <button
               type="button"
               onClick={() => {
                 setPath(null)
                 setSigningIn(false)
+                setGoogleReady(false)
               }}
-              disabled={signingIn}
+              disabled={signingIn || Boolean(toast)}
               className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-brand-soft/80 transition hover:text-white disabled:opacity-50"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to account type
             </button>
+
+            <p className="mt-4 max-w-sm text-center text-[10px] leading-relaxed text-brand-soft/55">
+              If Google shows 403, add <span className="font-semibold text-white/80">{typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'}</span> in
+              Google Cloud Console → OAuth Client → Authorized JavaScript origins.
+            </p>
           </div>
         )}
       </div>

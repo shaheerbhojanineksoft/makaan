@@ -3,6 +3,31 @@ import { ChevronDown, Heart, LogOut, ShieldCheck, UserRound } from 'lucide-react
 import { Link } from 'react-router-dom'
 import { useCurrentUser } from '../utils/currentUser'
 
+function AvatarImage({ src, className = '' }) {
+  const [failed, setFailed] = useState(false)
+  const hasSrc = Boolean(src && String(src).trim() && String(src).trim() !== '-')
+
+  if (!hasSrc || failed) {
+    return (
+      <span
+        className={`inline-grid place-items-center rounded-full bg-brand-soft text-brand ring-1 ring-brand/10 ${className}`}
+        aria-hidden="true"
+      >
+        <UserRound className="h-5 w-5" />
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={src}
+      alt=""
+      onError={() => setFailed(true)}
+      className={`rounded-full object-cover ${className}`}
+    />
+  )
+}
+
 /**
  * Logged-in user DP in the header — compact avatar + light menu.
  */
@@ -11,6 +36,7 @@ export default function UserAvatarMenu({ compact = false, onSignOut }) {
   const rootRef = useRef(null)
   const [open, setOpen] = useState(false)
   const user = useCurrentUser()
+  const displayName = (user.name || '').trim() || 'Account'
 
   useEffect(() => {
     if (!open) return undefined
@@ -38,14 +64,13 @@ export default function UserAvatarMenu({ compact = false, onSignOut }) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={`${user.name} account menu`}
+        aria-label={`${displayName} account menu`}
         onClick={() => setOpen((value) => !value)}
         className="group inline-flex items-center gap-1.5 rounded-full transition"
       >
-        <img
-          src={user.avatar}
-          alt=""
-          className="h-11 w-11 rounded-full object-cover transition group-hover:opacity-90"
+        <AvatarImage
+          src={user.avatar || user.profilePicture}
+          className="h-11 w-11 transition group-hover:opacity-90"
         />
         {!compact && (
           <ChevronDown
@@ -63,14 +88,17 @@ export default function UserAvatarMenu({ compact = false, onSignOut }) {
         >
           <div className="border-b border-slate-100 bg-brand-soft/50 px-4 py-3">
             <div className="flex items-center gap-3">
-              <img
-                src={user.avatar}
-                alt=""
-                className="h-11 w-11 rounded-full object-cover ring-2 ring-white"
+              <AvatarImage
+                src={user.avatar || user.profilePicture}
+                className="h-11 w-11 ring-2 ring-white"
               />
               <div className="min-w-0">
-                <p className="truncate text-sm font-extrabold text-slate-900">{user.name}</p>
-                <p className="truncate text-[11px] font-medium text-slate-500">{user.email}</p>
+                <p className="truncate text-sm font-extrabold text-slate-900">
+                  {displayName}
+                </p>
+                <p className="truncate text-[11px] font-medium text-slate-500">
+                  {(user.email || '').trim() || '—'}
+                </p>
               </div>
             </div>
           </div>
